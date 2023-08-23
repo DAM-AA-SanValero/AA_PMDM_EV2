@@ -1,4 +1,4 @@
-package com.svalero.cybershopapp;
+package com.svalero.cybershopapp.view;
 
 import static com.svalero.cybershopapp.R.string.client_registered;
 import static com.svalero.cybershopapp.R.string.required_data;
@@ -39,8 +39,11 @@ import com.mapbox.maps.plugin.gestures.GesturesPlugin;
 import com.mapbox.maps.plugin.gestures.GesturesUtils;
 import com.mapbox.maps.plugin.gestures.OnMoveListener;
 import com.squareup.picasso.Picasso;
+import com.svalero.cybershopapp.R;
+import com.svalero.cybershopapp.contract.ClientRegisterContract;
 import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
+import com.svalero.cybershopapp.presenter.ClientRegisterPresenter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,8 +53,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class RegisterClientActivity extends AppCompatActivity {
+public class ClientRegisterView extends AppCompatActivity implements ClientRegisterContract.View {
 
+    private ClientRegisterPresenter presenter;
     private Client client;
     private ImageView imageView;
     private static final int SELECT_PICTURE = 100;
@@ -72,6 +76,8 @@ public class RegisterClientActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_client);
 
+        presenter = new ClientRegisterPresenter(this);
+
         etName = findViewById(R.id.etName);
         etSurname = findViewById(R.id.etSurname);
         etNumber = findViewById(R.id.etNumber);
@@ -80,7 +86,6 @@ public class RegisterClientActivity extends AppCompatActivity {
         clientMap = findViewById(R.id.clientMap);
         scrollView = findViewById(R.id.scrollView);
         imageView = findViewById(R.id.photoContact);
-
         imageView.setOnClickListener(v -> openGallery());
 
 
@@ -152,35 +157,32 @@ public class RegisterClientActivity extends AppCompatActivity {
             return;
         }
 
-
-
-
         client = new Client(name, surname, number, Date.valueOf(date), vip, point.latitude(), point.longitude(), image);
-
-
-
-        final AppDatabase database = Room.databaseBuilder(this, AppDatabase.class, DATABASE_CLIENTS)
-                .allowMainThreadQueries().build();
-        try {
-            database.clientDao().insert(client);
-
-            Toast.makeText(this, client_registered, Toast.LENGTH_LONG).show();
-            etName.setText("");
-            etSurname.setText("");
-            etNumber.setText("");
-            etDate.setText("");
-            onBackPressed();
-
-        } catch (SQLiteConstraintException sce){
-            Snackbar.make(etName, R.string.error_registering, BaseTransientBottomBar.LENGTH_LONG).show();
-        }
-        database.close();
+        presenter.registerClient(client);
+        onBackPressed();
     }
 
     public void cancelButton(View view){
         onBackPressed();
     }
 
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(etName, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(this, client_registered, Toast.LENGTH_LONG).show();
+
+    }
+    @Override
+    public void resetForm() {
+        etName.setText("");
+        etSurname.setText("");
+        etNumber.setText("");
+        etDate.setText("");
+    }
     private void addMarker(Point point) {
         PointAnnotationOptions pointAnnotationOptions = new PointAnnotationOptions()
                 .withPoint(point)

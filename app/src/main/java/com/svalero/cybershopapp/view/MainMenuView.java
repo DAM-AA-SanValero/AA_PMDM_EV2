@@ -1,4 +1,4 @@
-package com.svalero.cybershopapp;
+package com.svalero.cybershopapp.view;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -11,9 +11,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.svalero.cybershopapp.R;
+import com.svalero.cybershopapp.ViewProductActivity;
+import com.svalero.cybershopapp.ViewRepairActivity;
+
 import java.util.Locale;
 
-public class MenuActivity extends AppCompatActivity {
+public class MainMenuView extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +26,7 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     public void viewClients (View view){
-        Intent intent = new Intent(this, ViewClientActivity.class);
+        Intent intent = new Intent(this, ClientListView.class);
         startActivity(intent);
     }
 

@@ -1,4 +1,4 @@
-package com.svalero.cybershopapp;
+package com.svalero.cybershopapp.view;
 
 import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
 
@@ -27,14 +27,19 @@ import com.mapbox.maps.plugin.annotation.AnnotationPluginImplKt;
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager;
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManagerKt;
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions;
-import com.svalero.cybershopapp.adapters.ClientAdapter;
+import com.svalero.cybershopapp.MapsActivity;
+import com.svalero.cybershopapp.R;
+import com.svalero.cybershopapp.contract.ClientDetailsContract;
 import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
+import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
 
 import java.sql.Date;
 import java.util.Locale;
 
-public class ClientDetailsActivity extends AppCompatActivity {
+public class ClientDetailsView extends AppCompatActivity implements ClientDetailsContract.View {
+
+    private ClientDetailsPresenter presenter;
     private MapView mapView;
     private PointAnnotationManager pointAnnotationManager;
 
@@ -43,60 +48,17 @@ public class ClientDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client_details);
 
+        presenter = new ClientDetailsPresenter(this);
         Intent intent = getIntent();
         String name = intent.getStringExtra("name");
 
         if (name == null) return;
 
-        final AppDatabase database = Room.databaseBuilder(this, AppDatabase.class, DATABASE_CLIENTS)
-                .allowMainThreadQueries().build();
-
-        Client client = database.clientDao().getByName(name);
-
-        fillData(client);
-
         mapView = findViewById(R.id.mapping);
-        initializePointManager();
-        addClientToMap(client);
+
 
     }
 
-    private void fillData(Client client) {
-
-        ImageView imageView = findViewById(R.id.clientPhoto);
-        TextView tvName = findViewById(R.id.clientName);
-        TextView tvSurname = findViewById(R.id.clientSurname);
-        TextView tvNumber = findViewById(R.id.clientNumber);
-        TextView tvDate = findViewById(R.id.registered);
-        TextView tvStatus = findViewById(R.id.clientStatus);
-
-        tvName.setText(client.getName());
-        tvSurname.setText(client.getSurname());
-        tvNumber.setText(String.valueOf(client.getNumber()));
-        Date registerDate = client.getRegister_date();
-
-        if(registerDate != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            String formattedDate = sdf.format(client.getRegister_date());
-            tvDate.setText(formattedDate);
-        } else {
-            tvDate.setText(R.string.UnknownRegistering);
-        }
-
-        boolean isVip = client.isVip();
-        tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
-
-
-
-        byte[] image = client.getImage();
-
-        if (image != null && image.length > 0) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-            imageView.setImageBitmap(bitmap);
-        } else {
-            imageView.setImageResource(R.drawable.person);
-        }
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.actonbar_mainmenu, menu);
@@ -178,5 +140,45 @@ public class ClientDetailsActivity extends AppCompatActivity {
                 .bearing(-17.6)
                 .build();
         mapView.getMapboxMap().setCamera(cameraPosition);
+    }
+
+    @Override
+    public void showClient(Client client) {
+        ImageView imageView = findViewById(R.id.clientPhoto);
+        TextView tvName = findViewById(R.id.clientName);
+        TextView tvSurname = findViewById(R.id.clientSurname);
+        TextView tvNumber = findViewById(R.id.clientNumber);
+        TextView tvDate = findViewById(R.id.registered);
+        TextView tvStatus = findViewById(R.id.clientStatus);
+
+        tvName.setText(client.getName());
+        tvSurname.setText(client.getSurname());
+        tvNumber.setText(String.valueOf(client.getNumber()));
+        Date registerDate = client.getRegister_date();
+
+        if(registerDate != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String formattedDate = sdf.format(client.getRegister_date());
+            tvDate.setText(formattedDate);
+        } else {
+            tvDate.setText(R.string.UnknownRegistering);
+        }
+
+        boolean isVip = client.isVip();
+        tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
+
+
+
+        byte[] image = client.getImage();
+
+        if (image != null && image.length > 0) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            imageView.setImageBitmap(bitmap);
+        } else {
+            imageView.setImageResource(R.drawable.person);
+        }
+
+        initializePointManager();
+        addClientToMap(client);
     }
 }

@@ -14,7 +14,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
-import com.svalero.cybershopapp.ClientDetailsActivity;
+import com.svalero.cybershopapp.view.ClientDetailsView;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.UpdateClientActivity;
 import com.svalero.cybershopapp.database.AppDatabase;
@@ -83,7 +83,7 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
 
     public void seeClient(int position){
         Client client = clientList.get(position);
-        Intent intent = new Intent(context, ClientDetailsActivity.class);
+        Intent intent = new Intent(context, ClientDetailsView.class);
         intent.putExtra("name", client.getName());
         context.startActivity(intent);
 

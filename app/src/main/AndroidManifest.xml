@@ -29,13 +29,13 @@
             android:name=".UpdateClientActivity"
             android:exported="false" />
         <activity
-            android:name=".ClientDetailsActivity"
+            android:name=".view.ClientDetailsView"
             android:exported="false" />
         <activity
-            android:name=".RegisterClientActivity"
+            android:name=".view.ClientRegisterView"
             android:exported="false" />
         <activity
-            android:name=".ViewClientActivity"
+            android:name=".view.ClientListView"
             android:exported="false" />
         <activity
             android:name=".UpdateProductActivity"
@@ -62,7 +62,7 @@
             android:name=".ViewRepairActivity"
             android:exported="false" />
         <activity
-            android:name=".MenuActivity"
+            android:name=".view.MainMenuView"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

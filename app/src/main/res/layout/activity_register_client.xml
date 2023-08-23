@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="20dp"
-        tools:context=".RegisterClientActivity">
+        tools:context=".view.ClientRegisterView">
 
         <LinearLayout
             android:id="@+id/linearLayout2"
