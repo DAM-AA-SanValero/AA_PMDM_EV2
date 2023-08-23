@@ -2,6 +2,8 @@ package com.svalero.cybershopapp.contract;
 
 import com.svalero.cybershopapp.domain.Client;
 
+import java.util.List;
+
 public interface ClientDetailsContract {
 
     interface Model{

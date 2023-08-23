@@ -14,6 +14,10 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
+import com.svalero.cybershopapp.contract.ClientDeleteContract;
+import com.svalero.cybershopapp.presenter.ClientDeletePresenter;
 import com.svalero.cybershopapp.view.ClientDetailsView;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.UpdateClientActivity;
@@ -22,14 +26,22 @@ import com.svalero.cybershopapp.domain.Client;
 
 import java.util.List;
 
-public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHolder> {
+public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHolder>
+    implements ClientDeleteContract.View {
     public List<Client> clientList;
     public Context context;
+    private View snackBarView;
+    private ClientDeletePresenter presenter;
 
     ClientAdapter clientAdapter;
     public ClientAdapter(List<Client> clientList, Context context) {
         this.clientList = clientList;
         this.context = context;
+        presenter = new ClientDeletePresenter(this);
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     @Override
@@ -51,6 +63,16 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
         return clientList.size();
     }
 
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(snackBarView, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
     public class ClientHolder extends RecyclerView.ViewHolder{
         public TextView clientName;
         public TextView clientSurname;
@@ -64,6 +86,7 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
         public ClientHolder(View view){
             super(view);
             parentView = view;
+            snackBarView = parentView;
 
             clientName = view.findViewById(R.id.clientName);
             clientSurname = view.findViewById(R.id.clientSurname);
@@ -101,13 +124,10 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
         builder.setMessage(R.string.Are_you_sure_alert_dialog)
                 .setTitle(R.string.delete_client)
                 .setPositiveButton(R.string.yes, (dialog, i) -> {
-                    final AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, DATABASE_CLIENTS)
-                            .allowMainThreadQueries().build();
-                    Client client = clientList.get(position);
-                    db.clientDao().delete(client);
-
-                    clientList.remove(position);
-                    notifyItemRemoved(position);
+                  Client client = clientList.get(position);
+                  presenter.deleteClient(client.getId());
+                  clientList.remove(position);
+                  notifyItemRemoved(position);
                 })
                         .setNegativeButton(R.string.no, (dialog, id) -> dialog.dismiss());
         AlertDialog dialog = builder.create();

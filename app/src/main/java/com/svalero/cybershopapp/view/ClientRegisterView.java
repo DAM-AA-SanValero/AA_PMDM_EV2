@@ -173,7 +173,7 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
 
     @Override
     public void showMessage(String message) {
-        Toast.makeText(this, client_registered, Toast.LENGTH_LONG).show();
+         Toast.makeText(this, client_registered, Toast.LENGTH_LONG).show();
 
     }
     @Override
