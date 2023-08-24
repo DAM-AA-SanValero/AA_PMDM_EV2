@@ -18,7 +18,6 @@ public interface CybershopApiInterface {
     Call<List<Client>> getClient();
     @GET("clients/{id}")
     Call<Client> getClientById(@Path("id") long id);
-
     @GET("products")
     Call<List<Product>> getProduct();
     @GET("products/{id}")
