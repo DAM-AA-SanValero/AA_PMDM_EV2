@@ -12,8 +12,6 @@ public interface ClientListContract {
             void onLoadClientsError(String message);
         }
         void loadAllClients(OnLoadClientsListener listener);
-        List<Client> loadClientsByName(String name);
-        boolean deleteClientByName(String name);
     }
 
     interface View {
@@ -23,8 +21,6 @@ public interface ClientListContract {
 
     interface Presenter {
         void loadAllClients();
-        void loadClientsByName(String name);
-        void deleteClientByName(String name);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.svalero.cybershopapp;
+package com.svalero.cybershopapp.view;
 
 import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
 
@@ -15,123 +15,118 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
+import com.svalero.cybershopapp.R;
+import com.svalero.cybershopapp.contract.ClientUpdateContract;
 import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
-import com.svalero.cybershopapp.domain.Repair;
+import com.svalero.cybershopapp.presenter.ClientUpdatePresenter;
 
-import java.sql.Date;
+import java.util.Date;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class UpdateClientActivity extends AppCompatActivity {
-    private TextView tvName;
-    private TextView tvSurname;
-    private TextView tvNumber;
-    private TextView tvDate;
-    private EditText etName;
-    private EditText etSurname;
-    private EditText etNumber;
-    private EditText etDate;
+public class ClientUpdateView extends AppCompatActivity implements ClientUpdateContract.View {
+
+    private ClientUpdatePresenter presenter;
+    private TextView tvName, tvSurname, tvNumber, tvDate;
+    private EditText etName, etSurname, etNumber, etDate;
     private CheckBox cbVip;
-    private AppDatabase database;
-    private String originalName;
+    long clientId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_client);
 
+        initializeViews();
+
+        presenter = new ClientUpdatePresenter(this);
+
+        clientId = getIntent().getLongExtra("client_id", -1);
+        if (clientId == -1) return;
+
+        etDate.setOnClickListener(v -> showDatePickerDialog());
+        findViewById(R.id.updateBtn).setOnClickListener(this::updateButton);
+        findViewById(R.id.cancelBtn).setOnClickListener(this::cancelButton);
+    }
+
+    private void showDatePickerDialog() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(ClientUpdateView.this, (view, year1, month1, dayOfMonth) -> {
+            String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
+            etDate.setText(date);
+        }, year, month, day);
+        datePickerDialog.show();
+    }
+
+    private void initializeViews() {
         tvName = findViewById(R.id.etName);
         tvSurname = findViewById(R.id.etSurname);
         tvNumber = findViewById(R.id.etNumber);
         tvDate = findViewById(R.id.tilDate);
         cbVip = findViewById(R.id.cbVip);
-
         etName = findViewById(R.id.etName);
         etSurname = findViewById(R.id.etSurname);
         etNumber = findViewById(R.id.etNumber);
         etDate = findViewById(R.id.tilDate);
 
-        etDate.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(UpdateClientActivity.this, (view, year1, month1, dayOfMonth) -> {
-                String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-                etDate.setText(date);
-            }, year, month, day);
-            datePickerDialog.show();
-        });
-
-        Intent intent = getIntent();
-        String name = intent.getStringExtra("name");
-        if (name == null) return;
-
-        database = Room.databaseBuilder(this, AppDatabase.class, DATABASE_CLIENTS)
-                .allowMainThreadQueries().build();
-
-        Client client = database.clientDao().getByName(name);
-
-        fillData(client);
-        originalName = client.getName();
-    }
-
-    private void fillData(Client client) {
-        tvName.setText(client.getName());
-        tvSurname.setText(client.getSurname());
-        tvNumber.setText(String.valueOf(client.getNumber()));
-        tvDate.setText(String.valueOf(client.getRegister_date()));
-        cbVip.setChecked(client.isVip());
-
-
     }
     public void updateButton(View view){
 
-        String currentName = originalName;
+        byte[] image = null;
         String newName = etName.getText().toString();
         String newSurname = etSurname.getText().toString();
         String newNumber = etNumber.getText().toString();
         String newDate = etDate.getText().toString();
         boolean status = cbVip.isChecked();
+        double latitude = 0.0;
+        double longitude = 0.0;
 
-        Client currentClient = database.clientDao().getByName(currentName);
+        if (!newName.isEmpty() && !newSurname.isEmpty() && !newNumber.isEmpty()) {
+            String sqlDateStr = convertDateToSqlFormat(newDate);
+            if (sqlDateStr == null) {
+                showError("Formato de fecha incorrecto");
+                return;
+            }
 
-        String sqlDate = convertDateToSqlFormat(newDate);
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date updatedDate;
+            try {
+                updatedDate = formatter.parse(sqlDateStr);
+            } catch (ParseException e) {
+                showError("Error al convertir la fecha.");
+                return;
+            }
 
-        Date dbDate;
+            // Convertir java.util.Date a java.sql.Date
+            java.sql.Date sqlUpdatedDate = new java.sql.Date(updatedDate.getTime());
 
-        if (sqlDate != null) {
-           dbDate = Date.valueOf(sqlDate);
+            presenter.updateClient(clientId, new Client(newName, newSurname, newNumber,
+                    sqlUpdatedDate, status, latitude, longitude, image));
+            onBackPressed();
         } else {
-            dbDate = currentClient.getRegister_date();
+            showError("Completa todos los campos");
         }
-
-
-        database.clientDao().updateByName(currentName, newName, newSurname, newNumber, dbDate, status);
-
-        Client updatedClient = database.clientDao().getByName(currentName);
-
-        if(updatedClient != null) {
-        fillData(updatedClient);
-}
-        onBackPressed();
-
     }
+
     public void cancelButton(View view){onBackPressed();}
 
     private String convertDateToSqlFormat(String dateInOriginalFormat) {
         try {
             SimpleDateFormat originalFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             SimpleDateFormat sqlFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            java.util.Date date = originalFormat.parse(dateInOriginalFormat);
+            Date date = originalFormat.parse(dateInOriginalFormat);
             return sqlFormat.format(date);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -181,5 +176,31 @@ public class UpdateClientActivity extends AppCompatActivity {
                 .getDisplayMetrics());
         recreate();
     }
+
+    public void showClientDetails(Client client) {
+        clientId = client.getId();
+        etName.setText(client.getName());
+        etSurname.setText(client.getSurname());
+        etNumber.setText(String.valueOf(client.getNumber()));
+        etDate.setText(String.valueOf(client.getRegister_date()));
+        cbVip.setChecked(client.isVip());
+    }
+    @Override
+    public void showError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showSuccessMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showClientUpdatedMessage(Client client) {
+        showClientDetails(client);
+        showSuccessMessage("Cliente actualizado correctamente.");
+    }
+
+
 }
 

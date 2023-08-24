@@ -19,6 +19,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ClientListModel implements ClientListContract.Model {
+
     @Override
     public void loadAllClients(OnLoadClientsListener listener) {
         CybershopApiInterface cybershopApi = CybershopApi.buildInstance();
@@ -37,15 +38,5 @@ public class ClientListModel implements ClientListContract.Model {
                 listener.onLoadClientsError(message);
             }
         });
-    }
-
-    @Override
-    public List<Client> loadClientsByName(String name) {
-        return null;
-    }
-
-    @Override
-    public boolean deleteClientByName(String name) {
-        return false;
     }
 }

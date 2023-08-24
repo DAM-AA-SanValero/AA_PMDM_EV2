@@ -26,7 +26,7 @@
             android:name=".MapsActivity"
             android:exported="false" />
         <activity
-            android:name=".UpdateClientActivity"
+            android:name=".view.ClientUpdateView"
             android:exported="false" />
         <activity
             android:name=".view.ClientDetailsView"

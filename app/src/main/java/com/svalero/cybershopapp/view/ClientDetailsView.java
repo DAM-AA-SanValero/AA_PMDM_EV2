@@ -49,15 +49,52 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         setContentView(R.layout.activity_client_details);
 
         presenter = new ClientDetailsPresenter(this);
-        Intent intent = getIntent();
-        String name = intent.getStringExtra("name");
-
-        if (name == null) return;
+        long clientId = getIntent().getLongExtra("client_id", -1);
+        if (clientId != -1) {
+            presenter.loadClientById(clientId);
+        }
 
         mapView = findViewById(R.id.mapping);
-
-
     }
+    @Override
+    public void showClientDetails(Client client) {
+        ImageView imageView = findViewById(R.id.clientPhoto);
+        TextView tvName = findViewById(R.id.clientName);
+        TextView tvSurname = findViewById(R.id.clientSurname);
+        TextView tvNumber = findViewById(R.id.clientNumber);
+        TextView tvDate = findViewById(R.id.registered);
+        TextView tvStatus = findViewById(R.id.clientStatus);
+
+        tvName.setText(client.getName());
+        tvSurname.setText(client.getSurname());
+        tvNumber.setText(String.valueOf(client.getNumber()));
+        Date registerDate = client.getRegister_date();
+
+        if(registerDate != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String formattedDate = sdf.format(client.getRegister_date());
+            tvDate.setText(formattedDate);
+        } else {
+            tvDate.setText(R.string.UnknownRegistering);
+        }
+
+        boolean isVip = client.isVip();
+        tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
+
+        byte[] image = client.getImage();
+
+        if (image != null && image.length > 0) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            imageView.setImageBitmap(bitmap);
+        } else {
+            imageView.setImageResource(R.drawable.person);
+        }
+
+        initializePointManager();
+        addClientToMap(client);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -142,43 +179,9 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         mapView.getMapboxMap().setCamera(cameraPosition);
     }
 
+
     @Override
-    public void showClient(Client client) {
-        ImageView imageView = findViewById(R.id.clientPhoto);
-        TextView tvName = findViewById(R.id.clientName);
-        TextView tvSurname = findViewById(R.id.clientSurname);
-        TextView tvNumber = findViewById(R.id.clientNumber);
-        TextView tvDate = findViewById(R.id.registered);
-        TextView tvStatus = findViewById(R.id.clientStatus);
+    public void showMessage(String message) {
 
-        tvName.setText(client.getName());
-        tvSurname.setText(client.getSurname());
-        tvNumber.setText(String.valueOf(client.getNumber()));
-        Date registerDate = client.getRegister_date();
-
-        if(registerDate != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            String formattedDate = sdf.format(client.getRegister_date());
-            tvDate.setText(formattedDate);
-        } else {
-            tvDate.setText(R.string.UnknownRegistering);
-        }
-
-        boolean isVip = client.isVip();
-        tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
-
-
-
-        byte[] image = client.getImage();
-
-        if (image != null && image.length > 0) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-            imageView.setImageBitmap(bitmap);
-        } else {
-            imageView.setImageResource(R.drawable.person);
-        }
-
-        initializePointManager();
-        addClientToMap(client);
     }
 }

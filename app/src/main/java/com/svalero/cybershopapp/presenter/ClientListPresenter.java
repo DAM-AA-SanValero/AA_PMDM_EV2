@@ -25,16 +25,6 @@ public class ClientListPresenter implements ClientListContract.Presenter
     }
 
     @Override
-    public void loadClientsByName(String name) {
-
-    }
-
-    @Override
-    public void deleteClientByName(String name) {
-
-    }
-
-    @Override
     public void onLoadClientsSuccess(List<Client> clients) {
         view.showClients(clients);
     }

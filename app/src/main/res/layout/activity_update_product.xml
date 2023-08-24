@@ -25,7 +25,7 @@
             android:text="@string/update" />
 
         <Button
-            android:id="@+id/cancelButton"
+            android:id="@+id/cancelBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"

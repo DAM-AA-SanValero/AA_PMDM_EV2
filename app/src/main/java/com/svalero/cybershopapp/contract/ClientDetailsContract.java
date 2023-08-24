@@ -7,16 +7,22 @@ import java.util.List;
 public interface ClientDetailsContract {
 
     interface Model{
-        Client loadClient(String name);
+
+        interface OnLoadClientListener{
+            void onLoadClientSuccess(Client clients);
+            void onLoadClientError(String message);
+        }
+        void loadClientById(long clientId, OnLoadClientListener listener);
     }
 
     interface View {
-        void showClient(Client client);
+        void showClientDetails(Client client);
+        void showMessage(String message);
 
     }
 
     interface Presenter {
-        void loadClient(String name);
+        void loadClientById(long id);
 
     }
 }

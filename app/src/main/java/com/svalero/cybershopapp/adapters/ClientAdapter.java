@@ -1,7 +1,5 @@
 package com.svalero.cybershopapp.adapters;
 
-import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +10,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -20,8 +17,7 @@ import com.svalero.cybershopapp.contract.ClientDeleteContract;
 import com.svalero.cybershopapp.presenter.ClientDeletePresenter;
 import com.svalero.cybershopapp.view.ClientDetailsView;
 import com.svalero.cybershopapp.R;
-import com.svalero.cybershopapp.UpdateClientActivity;
-import com.svalero.cybershopapp.database.AppDatabase;
+import com.svalero.cybershopapp.view.ClientUpdateView;
 import com.svalero.cybershopapp.domain.Client;
 
 import java.util.List;
@@ -107,16 +103,15 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
     public void seeClient(int position){
         Client client = clientList.get(position);
         Intent intent = new Intent(context, ClientDetailsView.class);
-        intent.putExtra("name", client.getName());
+        intent.putExtra("client_id", client.getId());
         context.startActivity(intent);
 
 
     }
     public void updateClient(int position){
         Client client = clientList.get(position);
-        Intent intent = new Intent(context, UpdateClientActivity.class);
-        intent.putExtra("name", client.getName());
-        intent.putExtra("position", position);
+        Intent intent = new Intent(context, ClientUpdateView.class);
+        intent.putExtra("client_id", client.getId());
         context.startActivity(intent);
     }
     public void deleteClient(int position){
