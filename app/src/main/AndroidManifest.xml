@@ -12,6 +12,7 @@
 
 
 
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,46 +24,46 @@
         android:theme="@style/Theme.CybershopAPP"
         tools:targetApi="31">
         <activity
-            android:name=".MapsActivity"
+            android:name=".view.ClientMapView"
             android:exported="false" />
         <activity
-            android:name=".UpdateClientActivity"
+            android:name=".view.ClientUpdateView"
             android:exported="false" />
         <activity
-            android:name=".ClientDetailsActivity"
+            android:name=".view.ClientDetailsView"
             android:exported="false" />
         <activity
-            android:name=".RegisterClientActivity"
+            android:name=".view.ClientRegisterView"
             android:exported="false" />
         <activity
-            android:name=".ViewClientActivity"
+            android:name=".view.ClientListView"
             android:exported="false" />
         <activity
-            android:name=".UpdateProductActivity"
+            android:name=".view.ProductUpdateView"
             android:exported="false" />
         <activity
-            android:name=".ProductDetailsActivity"
+            android:name=".view.ProductDetailsView"
             android:exported="false" />
         <activity
-            android:name=".RegisterProductActivity"
+            android:name=".view.ProductRegisterView"
             android:exported="false" />
         <activity
-            android:name=".ViewProductActivity"
+            android:name=".view.ProductListView"
             android:exported="false" />
         <activity
-            android:name=".UpdateRepairActivity"
+            android:name=".view.RepairUpdateView"
             android:exported="false" />
         <activity
-            android:name=".RepairDetailsActivity"
+            android:name=".view.RepairDetailsView"
             android:exported="false" />
         <activity
-            android:name=".RegisterRepairActivity"
+            android:name=".view.RepairRegisterView"
             android:exported="false" />
         <activity
-            android:name=".ViewRepairActivity"
+            android:name=".view.RepairListView"
             android:exported="false" />
         <activity
-            android:name=".MenuActivity"
+            android:name=".view.MainMenuView"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

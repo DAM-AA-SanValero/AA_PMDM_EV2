@@ -58,4 +58,5 @@
     <string name="repair_date">Reparar fecha</string>
     <string name="error_updating">Error mientras actualiza</string>
     <string name="not_shipped">Aún no enviado</string>
+    <string name="ErrorLoadingMap">Error al cargar los clientes en el mapa</string>
 </resources>

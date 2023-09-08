@@ -30,15 +30,19 @@ public class Product {
     @ColumnInfo
     private boolean inStock;
     @ColumnInfo
-    private byte[] image;
+    private String image;
 
-    public Product(String name, String type, String price, String origin, boolean inStock, byte[] image) {
+    public Product(String name, String type, String price, String origin, boolean inStock, String image) {
         this.name = name;
         this.type = type;
         this.price = price;
         this.origin = origin;
         this.inStock = inStock;
         this.image = image;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getName() {
@@ -81,11 +85,11 @@ public class Product {
         this.inStock = inStock;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 }

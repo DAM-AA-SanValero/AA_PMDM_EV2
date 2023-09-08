@@ -1,9 +1,7 @@
 package com.svalero.cybershopapp.domain;
 
-import androidx.room.*;
 
-
-import java.sql.Date;
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,37 +10,30 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class Client {
 
-    @PrimaryKey(autoGenerate = true)
     private long id;
-    @ColumnInfo
     private String name;
-    @ColumnInfo
     private String surname;
-    @ColumnInfo
     private String number;
-    @ColumnInfo
-    private Date register_date;
-    @ColumnInfo
+    private LocalDate registerDate;
     private boolean vip;
-    @ColumnInfo
     private double latitude;
-    @ColumnInfo
     private double longitude;
-    @ColumnInfo
-    private byte[] image;
+    private String image;
+    private Boolean favourite;
 
-    public Client(String name, String surname, String number, Date register_date, boolean vip, double latitude, double longitude, byte[] image) {
+    public Client(String name, String surname, String number, LocalDate registerDate,
+                  boolean vip, double latitude, double longitude, String image, Boolean isFavourite) {
         this.name = name;
         this.surname = surname;
         this.number = number;
-        this.register_date = register_date;
+        this.registerDate = registerDate;
         this.vip = vip;
         this.latitude = latitude;
         this.longitude = longitude;
         this.image = image;
+        this.favourite = isFavourite;
     }
 
     public long getId() {
@@ -77,12 +68,12 @@ public class Client {
         this.number = number;
     }
 
-    public Date getRegister_date() {
-        return register_date;
+    public LocalDate getRegisterDate() {
+        return registerDate;
     }
 
-    public void setRegister_date(Date register_date) {
-        this.register_date = register_date;
+    public void setRegisterDate(LocalDate registerDate) {
+        this.registerDate = registerDate;
     }
 
     public boolean isVip() {
@@ -109,11 +100,19 @@ public class Client {
         this.longitude = longitude;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
+    }
+
+    public Boolean getFavourite() {
+        return favourite;
+    }
+
+    public void setFavourite(Boolean favourite) {
+        this.favourite = favourite;
     }
 }
