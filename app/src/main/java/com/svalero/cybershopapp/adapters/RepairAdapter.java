@@ -1,12 +1,8 @@
 package com.svalero.cybershopapp.adapters;
 
-import static com.svalero.cybershopapp.database.Constants.DATABASE_PRODUCTS;
-import static com.svalero.cybershopapp.database.Constants.DATABASE_REPAIRS;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.SimpleDateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,37 +11,46 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
-import com.svalero.cybershopapp.ProductDetailsActivity;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.svalero.cybershopapp.R;
-import com.svalero.cybershopapp.RepairDetailsActivity;
-import com.svalero.cybershopapp.UpdateProductActivity;
-import com.svalero.cybershopapp.UpdateRepairActivity;
-import com.svalero.cybershopapp.database.AppDatabase;
-import com.svalero.cybershopapp.domain.Product;
+import com.svalero.cybershopapp.contract.RepairDeleteContract;
+import com.svalero.cybershopapp.presenter.RepairDeletePresenter;
+import com.svalero.cybershopapp.view.RepairDetailsView;
+import com.svalero.cybershopapp.view.RepairUpdateView;
 import com.svalero.cybershopapp.domain.Repair;
 
-import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHolder> {
+public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHolder>
+    implements RepairDeleteContract.View {
 
+    RepairDeletePresenter presenter;
+
+    private View snackBarView;
     public List<Repair> repairList;
     public Context context;
     RepairAdapter repairAdapter;
 
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+
     public RepairAdapter(List<Repair> repairList, Context context) {
         this.repairList = repairList;
         this.context = context;
+        presenter = new RepairDeletePresenter(this);
     }
 
     @Override
-    public RepairAdapter.RepairHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RepairHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.repair_item, parent, false);
-        return new RepairAdapter.RepairHolder(view);
+        return new RepairHolder(view);
     }
 
     @Override
@@ -54,14 +59,13 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
         holder.repairAddress.setText(repairList.get(position).getShippingAddress());
 
 
-        Date repairedDate = repairList.get(position).getRepairedDate();
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        LocalDate repairedDate = repairList.get(position).getRepairedDate();
         if(repairedDate != null) {
-            String repairedDateString = format.format(repairedDate);
+            String repairedDateString = repairedDate.format(dateFormatter);
             if ("01/01/0001".equals(repairedDateString)) {
                 holder.repairedDate.setText(context.getString(R.string.not_repaired));
             } else {
-                holder.repairedDate.setText(context.getString(R.string.repaired));
+                holder.repairedDate.setText(context.getString(R.string.repaired) + " " + repairedDateString);
             }
         } else {
             holder.repairedDate.setText(context.getString(R.string.not_repaired));
@@ -71,6 +75,16 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
     @Override
     public int getItemCount() {
         return repairList.size();
+    }
+
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(snackBarView, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();
     }
 
     public class RepairHolder extends RecyclerView.ViewHolder{
@@ -86,6 +100,7 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
         public RepairHolder(View view){
             super(view);
             parentView = view;
+            snackBarView = parentView;
 
             repairComponent = view.findViewById(R.id.repairComponent);
             repairAddress = view.findViewById(R.id.repairAddress);
@@ -105,17 +120,17 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
 
     public void seeRepair(int position){
         Repair repair = repairList.get(position);
-        Intent intent = new Intent(context, RepairDetailsActivity.class);
-        intent.putExtra("component", repair.getComponent());
+        Intent intent = new Intent(context, RepairDetailsView.class);
+        intent.putExtra("repair_id", repair.getId());
         context.startActivity(intent);
 
 
     }
     public void updateRepair(int position){
         Repair repair = repairList.get(position);
-        Intent intent = new Intent(context, UpdateRepairActivity.class);
-        intent.putExtra("component", repair.getComponent());
-        intent.putExtra("position", position);
+        Intent intent = new Intent(context, RepairUpdateView.class);
+        intent.putExtra("repair_id", repair.getId());
+        //intent.putExtra("position", position);
         context.startActivity(intent);
     }
     public void deleteRepair(int position){
@@ -123,10 +138,8 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
         builder.setMessage(R.string.Are_you_sure_alert_dialog)
                 .setTitle(R.string.delete_repair)
                 .setPositiveButton(R.string.yes, (dialog, i) -> {
-                    final AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, DATABASE_REPAIRS)
-                            .allowMainThreadQueries().build();
                     Repair repair = repairList.get(position);
-                    db.repairDao().delete(repair);
+                    presenter.deleteRepair(repair.getId());
 
                     repairList.remove(position);
                     notifyItemRemoved(position);
