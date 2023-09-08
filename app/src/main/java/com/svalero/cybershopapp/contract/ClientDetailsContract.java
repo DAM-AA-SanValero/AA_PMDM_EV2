@@ -24,5 +24,7 @@ public interface ClientDetailsContract {
     interface Presenter {
         void loadClientById(long id);
 
+        void getClientDetails(long clientId);
+
     }
 }

@@ -12,8 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.svalero.cybershopapp.R;
-import com.svalero.cybershopapp.ViewProductActivity;
-import com.svalero.cybershopapp.ViewRepairActivity;
 
 import java.util.Locale;
 
@@ -22,7 +20,7 @@ public class MainMenuView extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu);
+        setContentView(R.layout.menu_view);
     }
 
     public void viewClients (View view){
@@ -31,12 +29,12 @@ public class MainMenuView extends AppCompatActivity {
     }
 
     public void viewProducts (View view){
-        Intent intent = new Intent(this, ViewProductActivity.class);
+        Intent intent = new Intent(this, ProductListView.class);
         startActivity(intent);
     }
 
     public void viewRepairs (View view){
-        Intent intent = new Intent(this, ViewRepairActivity.class);
+        Intent intent = new Intent(this, RepairListView.class);
         startActivity(intent);
     }
 

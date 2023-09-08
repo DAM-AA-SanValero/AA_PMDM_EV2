@@ -1,119 +1,156 @@
 package com.svalero.cybershopapp.view;
 
-import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mapbox.android.gestures.MoveGestureDetector;
+import com.mapbox.geojson.Point;
+import com.mapbox.maps.CameraOptions;
+import com.mapbox.maps.MapView;
+import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.plugin.annotation.AnnotationConfig;
+import com.mapbox.maps.plugin.annotation.AnnotationPlugin;
+import com.mapbox.maps.plugin.annotation.AnnotationPluginImplKt;
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager;
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManagerKt;
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions;
+import com.mapbox.maps.plugin.gestures.GesturesPlugin;
+import com.mapbox.maps.plugin.gestures.GesturesUtils;
+import com.mapbox.maps.plugin.gestures.OnMoveListener;
 import com.svalero.cybershopapp.R;
+import com.svalero.cybershopapp.contract.ClientDetailsContract;
 import com.svalero.cybershopapp.contract.ClientUpdateContract;
-import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
+import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
 import com.svalero.cybershopapp.presenter.ClientUpdatePresenter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ClientUpdateView extends AppCompatActivity implements ClientUpdateContract.View {
+public class ClientUpdateView extends AppCompatActivity implements ClientUpdateContract.View,
+        ClientDetailsContract.View {
 
+    private ClientDetailsPresenter presenterDetails;
     private ClientUpdatePresenter presenter;
-    private TextView tvName, tvSurname, tvNumber, tvDate;
     private EditText etName, etSurname, etNumber, etDate;
+    private MapView clientMap;
+    private ScrollView scrollView;
+    private Point point;
+    private PointAnnotationManager pointAnnotationManager;
+
+
     private CheckBox cbVip;
+    private Boolean favouriteValue = null;
+
     long clientId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_update_client);
+        setContentView(R.layout.client_update_view);
 
         initializeViews();
-
         presenter = new ClientUpdatePresenter(this);
+        presenterDetails = new ClientDetailsPresenter(this);
 
         clientId = getIntent().getLongExtra("client_id", -1);
         if (clientId == -1) return;
+        presenterDetails.getClientDetails(clientId);;
+
+
 
         etDate.setOnClickListener(v -> showDatePickerDialog());
         findViewById(R.id.updateBtn).setOnClickListener(this::updateButton);
         findViewById(R.id.cancelBtn).setOnClickListener(this::cancelButton);
     }
-
-    private void showDatePickerDialog() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(ClientUpdateView.this, (view, year1, month1, dayOfMonth) -> {
-            String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-            etDate.setText(date);
-        }, year, month, day);
-        datePickerDialog.show();
-    }
-
     private void initializeViews() {
-        tvName = findViewById(R.id.etName);
-        tvSurname = findViewById(R.id.etSurname);
-        tvNumber = findViewById(R.id.etNumber);
-        tvDate = findViewById(R.id.tilDate);
-        cbVip = findViewById(R.id.cbVip);
+        scrollView = findViewById(R.id.scrollView);
+
         etName = findViewById(R.id.etName);
         etSurname = findViewById(R.id.etSurname);
         etNumber = findViewById(R.id.etNumber);
         etDate = findViewById(R.id.tilDate);
+        cbVip = findViewById(R.id.cbVip);
+
+        clientMap = findViewById(R.id.clientMap);
+
+        GesturesPlugin gesturesPlugin = GesturesUtils.getGestures(clientMap);
+        gesturesPlugin.addOnMapClickListener(point -> {
+            removeAllMarkers();
+            this.point = point;
+            addMarker(point);
+            return true ;
+        });
+
+        gesturesPlugin.setPinchToZoomEnabled(true);
+        gesturesPlugin.addOnMoveListener(new OnMoveListener() {
+            @Override
+            public void onMoveBegin(MoveGestureDetector detector) {
+                scrollView.requestDisallowInterceptTouchEvent(true);
+            }
+            @Override
+            public boolean onMove(@NonNull MoveGestureDetector detector) {
+                return false;
+            }
+            @Override
+            public void onMoveEnd(MoveGestureDetector detector) {
+                scrollView.requestDisallowInterceptTouchEvent(false);
+            }
+        });
+        initializePointManager();
+    }
+
+    public void showClientDetails(Client client) {
+        clientId = client.getId();
+        etName.setText(client.getName());
+        etSurname.setText(client.getSurname());
+        etNumber.setText(String.valueOf(client.getNumber()));
+        etDate.setText(client.getRegister_date());
+        cbVip.setChecked(client.isVip());
+        favouriteValue = client.getFavourite();
+
+        initializePointManager();
+        addClientToMap(client);
+    }
+
+    @Override
+    public void showMessage(String message) {
 
     }
+
     public void updateButton(View view){
 
-        byte[] image = null;
+        String image = null;
         String newName = etName.getText().toString();
         String newSurname = etSurname.getText().toString();
         String newNumber = etNumber.getText().toString();
         String newDate = etDate.getText().toString();
         boolean status = cbVip.isChecked();
-        double latitude = 0.0;
-        double longitude = 0.0;
+        double latitude = (this.point != null) ? this.point.latitude() : 0.0;
+        double longitude = (this.point != null) ? this.point.longitude() : 0.0;
 
         if (!newName.isEmpty() && !newSurname.isEmpty() && !newNumber.isEmpty()) {
-            String sqlDateStr = convertDateToSqlFormat(newDate);
-            if (sqlDateStr == null) {
-                showError("Formato de fecha incorrecto");
-                return;
-            }
-
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date updatedDate;
-            try {
-                updatedDate = formatter.parse(sqlDateStr);
-            } catch (ParseException e) {
-                showError("Error al convertir la fecha.");
-                return;
-            }
-
-            // Convertir java.util.Date a java.sql.Date
-            java.sql.Date sqlUpdatedDate = new java.sql.Date(updatedDate.getTime());
 
             presenter.updateClient(clientId, new Client(newName, newSurname, newNumber,
-                    sqlUpdatedDate, status, latitude, longitude, image));
+                    newDate, status, latitude, longitude, image, favouriteValue ));
             onBackPressed();
         } else {
             showError("Completa todos los campos");
@@ -122,6 +159,18 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
 
     public void cancelButton(View view){onBackPressed();}
 
+    private void showDatePickerDialog() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(ClientUpdateView.this, (view, year1, month1, dayOfMonth) -> {
+            LocalDate selectedDate = LocalDate.of(year1, month1 + 1, dayOfMonth);
+            etDate.setText(selectedDate.toString());
+        }, year, month, day);
+        datePickerDialog.show();
+    }
     private String convertDateToSqlFormat(String dateInOriginalFormat) {
         try {
             SimpleDateFormat originalFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -177,13 +226,43 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         recreate();
     }
 
-    public void showClientDetails(Client client) {
-        clientId = client.getId();
-        etName.setText(client.getName());
-        etSurname.setText(client.getSurname());
-        etNumber.setText(String.valueOf(client.getNumber()));
-        etDate.setText(String.valueOf(client.getRegister_date()));
-        cbVip.setChecked(client.isVip());
+
+    private void addClientToMap(Client client) {
+        Point clientPoint = Point.fromLngLat(client.getLongitude(), client.getLatitude());
+        addMarker(clientPoint);
+
+        if (clientPoint != null) {
+            setCameraPosition(clientPoint);
+        } else {
+            setCameraPosition(Point.fromLngLat(-0.8738521, 41.6396971));
+        }
+    }
+
+    private void initializePointManager() {
+        AnnotationPlugin annotationPlugin = AnnotationPluginImplKt.getAnnotations(clientMap);
+        AnnotationConfig annotationConfig = new AnnotationConfig();
+        pointAnnotationManager = PointAnnotationManagerKt.createPointAnnotationManager(annotationPlugin, annotationConfig);
+    }
+
+    private void addMarker(Point point) {
+        PointAnnotationOptions pointAnnotationOptions = new PointAnnotationOptions()
+                .withPoint(point)
+                .withIconImage(BitmapFactory.decodeResource(getResources(), R.mipmap.purple_marker_foreground));
+        pointAnnotationManager.create(pointAnnotationOptions);
+    }
+
+    private void setCameraPosition(Point point) {
+        CameraOptions cameraPosition = new CameraOptions.Builder()
+                .center(point)
+                .pitch(20.0)
+                .zoom(15.5)
+                .bearing(-17.6)
+                .build();
+        clientMap.getMapboxMap().setCamera(cameraPosition);
+    }
+
+    private void removeAllMarkers(){
+        pointAnnotationManager.deleteAll();
     }
     @Override
     public void showError(String errorMessage) {

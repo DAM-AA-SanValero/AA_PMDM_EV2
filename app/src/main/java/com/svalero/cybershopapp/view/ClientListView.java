@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.svalero.cybershopapp.MapsActivity;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.adapters.ClientAdapter;
 import com.svalero.cybershopapp.contract.ClientListContract;
@@ -33,7 +32,7 @@ public class ClientListView extends AppCompatActivity implements ClientListContr
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_client);
+        setContentView(R.layout.client_list_view);
 
         presenter = new ClientListPresenter(this);
         clientList = new ArrayList<>();
@@ -79,7 +78,7 @@ public class ClientListView extends AppCompatActivity implements ClientListContr
         int id = item.getItemId();
 
         if (item.getItemId() == R.id.getMap) {
-            Intent intent = new Intent(this, MapsActivity.class);
+            Intent intent = new Intent(this, ClientMapView.class);
             startActivity(intent);
             return true;
         } else if (id == R.id.getPreferences){

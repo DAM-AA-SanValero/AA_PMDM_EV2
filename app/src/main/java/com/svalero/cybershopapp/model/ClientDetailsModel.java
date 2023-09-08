@@ -1,16 +1,10 @@
 package com.svalero.cybershopapp.model;
 
-import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
-
-import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
-
-import androidx.room.Room;
 
 import com.svalero.cybershopapp.api.CybershopApi;
 import com.svalero.cybershopapp.api.CybershopApiInterface;
 import com.svalero.cybershopapp.contract.ClientDetailsContract;
-import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
 
 import retrofit2.Call;

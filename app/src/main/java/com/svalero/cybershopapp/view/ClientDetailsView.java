@@ -1,17 +1,14 @@
 package com.svalero.cybershopapp.view;
 
-import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,14 +24,13 @@ import com.mapbox.maps.plugin.annotation.AnnotationPluginImplKt;
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager;
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManagerKt;
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions;
-import com.svalero.cybershopapp.MapsActivity;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ClientDetailsContract;
-import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
 import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 public class ClientDetailsView extends AppCompatActivity implements ClientDetailsContract.View {
@@ -46,7 +42,7 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_client_details);
+        setContentView(R.layout.client_details_view);
 
         presenter = new ClientDetailsPresenter(this);
         long clientId = getIntent().getLongExtra("client_id", -1);
@@ -68,7 +64,7 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         tvName.setText(client.getName());
         tvSurname.setText(client.getSurname());
         tvNumber.setText(String.valueOf(client.getNumber()));
-        Date registerDate = client.getRegister_date();
+        String registerDate = client.getRegister_date();
 
         if(registerDate != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -81,11 +77,9 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         boolean isVip = client.isVip();
         tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
 
-        byte[] image = client.getImage();
-
-        if (image != null && image.length > 0) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-            imageView.setImageBitmap(bitmap);
+        String image = client.getImage();
+        if (image != null && !image.isEmpty()) {
+            imageView.setImageURI(Uri.parse(image));
         } else {
             imageView.setImageResource(R.drawable.person);
         }
@@ -107,7 +101,7 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         int id = item.getItemId();
 
         if (item.getItemId() == R.id.getMap) {
-            Intent intent = new Intent(this, MapsActivity.class);
+            Intent intent = new Intent(this, ClientMapView.class);
             startActivity(intent);
             return true;
         } else if (id == R.id.getPreferences){

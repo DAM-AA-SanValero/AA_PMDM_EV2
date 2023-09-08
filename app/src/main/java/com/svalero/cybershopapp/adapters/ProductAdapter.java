@@ -1,6 +1,5 @@
 package com.svalero.cybershopapp.adapters;
 
-import static com.svalero.cybershopapp.database.Constants.DATABASE_PRODUCTS;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -11,24 +10,31 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
-import com.svalero.cybershopapp.ProductDetailsActivity;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
+import com.svalero.cybershopapp.contract.ProductDeleteContract;
+import com.svalero.cybershopapp.presenter.ProductDeletePresenter;
+import com.svalero.cybershopapp.view.ProductDetailsView;
 import com.svalero.cybershopapp.R;
-import com.svalero.cybershopapp.UpdateProductActivity;
-import com.svalero.cybershopapp.database.AppDatabase;
+import com.svalero.cybershopapp.view.ProductUpdateView;
 import com.svalero.cybershopapp.domain.Product;
 
 import java.util.List;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductHolder> {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductHolder>
+implements ProductDeleteContract.View {
 
     public List<Product> productList;
     public Context context;
+    private View snackBarView;
+
+    private ProductDeletePresenter presenter;
     ProductAdapter productAdapter;
     public ProductAdapter(List<Product> productList, Context context) {
         this.productList = productList;
         this.context = context;
+        presenter = new ProductDeletePresenter(this);
     }
 
     @Override
@@ -57,6 +63,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         return productList.size();
     }
 
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(snackBarView, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
     public class ProductHolder extends RecyclerView.ViewHolder{
         public TextView productName;
         public TextView productType;
@@ -70,6 +86,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         public ProductHolder(View view){
             super(view);
             parentView = view;
+            snackBarView = parentView;
 
             productName = view.findViewById(R.id.productName);
             productType = view.findViewById(R.id.productType);
@@ -89,17 +106,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
 
     public void seeProduct(int position){
         Product product = productList.get(position);
-        Intent intent = new Intent(context, ProductDetailsActivity.class);
-        intent.putExtra("name", product.getName());
+        Intent intent = new Intent(context, ProductDetailsView.class);
+        intent.putExtra("product_id", product.getId());
         context.startActivity(intent);
 
 
     }
     public void updateProduct(int position){
         Product product = productList.get(position);
-        Intent intent = new Intent(context, UpdateProductActivity.class);
-        intent.putExtra("name", product.getName());
-        intent.putExtra("position", position);
+        Intent intent = new Intent(context, ProductUpdateView.class);
+        intent.putExtra("product_id", product.getId());
+       // intent.putExtra("position", position);
         context.startActivity(intent);
     }
     public void deleteProduct(int position){
@@ -107,11 +124,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         builder.setMessage(R.string.Are_you_sure_alert_dialog)
                 .setTitle(R.string.delete_client)
                 .setPositiveButton(R.string.yes, (dialog, i) -> {
-                    final AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, DATABASE_PRODUCTS)
-                            .allowMainThreadQueries().build();
                     Product product = productList.get(position);
-                    db.productDao().delete(product);
-
+                    presenter.deleteProduct(product.getId());
                     productList.remove(position);
                     notifyItemRemoved(position);
                 })
@@ -120,5 +134,4 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         dialog.show();
 
     }
-
 }

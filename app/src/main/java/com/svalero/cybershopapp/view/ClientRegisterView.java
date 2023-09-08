@@ -2,16 +2,12 @@ package com.svalero.cybershopapp.view;
 
 import static com.svalero.cybershopapp.R.string.client_registered;
 import static com.svalero.cybershopapp.R.string.required_data;
-import static com.svalero.cybershopapp.database.Constants.DATABASE_CLIENTS;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
-
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,14 +37,12 @@ import com.mapbox.maps.plugin.gestures.OnMoveListener;
 import com.squareup.picasso.Picasso;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ClientRegisterContract;
-import com.svalero.cybershopapp.database.AppDatabase;
 import com.svalero.cybershopapp.domain.Client;
 import com.svalero.cybershopapp.presenter.ClientRegisterPresenter;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -59,22 +53,18 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
     private Client client;
     private ImageView imageView;
     private static final int SELECT_PICTURE = 100;
-    private EditText etName;
-    private EditText etSurname;
-    private EditText etNumber;
-    private EditText etDate;
+    private EditText etName, etSurname, etNumber, etDate;
     private CheckBox cbVIP;
     private MapView clientMap;
     private ScrollView scrollView;
     private Point point;
     private PointAnnotationManager pointAnnotationManager;
-    private AppDatabase database;
-    private byte[] image;
+    private String image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register_client);
+        setContentView(R.layout.client_register_view);
 
         presenter = new ClientRegisterPresenter(this);
 
@@ -85,7 +75,7 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         cbVIP = findViewById(R.id.cbVip);
         clientMap = findViewById(R.id.clientMap);
         scrollView = findViewById(R.id.scrollView);
-        imageView = findViewById(R.id.photoContact);
+        imageView = findViewById(R.id.productPhoto);
         imageView.setOnClickListener(v -> openGallery());
 
 
@@ -122,12 +112,11 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        // Crear el DatePickerDialog
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String selectedDate = selectedYear + "-" + (selectedMonth + 1) + "-" + selectedDay;
-                    etDate.setText(selectedDate);
+                    LocalDate localDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay);
+                    etDate.setText(localDate.toString());
                 },
                 year,
                 month,
@@ -137,15 +126,14 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         datePickerDialog.show();
     }
 
-
-
     public void addButton(View view) {
 
         String name = etName.getText().toString();
         String surname = etSurname.getText().toString();
         String number = etNumber.getText().toString();
-        String date = etDate.getText().toString();
+        String date = etDate.getText().toString().trim();
         boolean vip = cbVIP.isChecked();
+        boolean favourite = false;
 
         if (name.isEmpty() || surname.isEmpty() || number.isEmpty() || date.isEmpty()){
             Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
@@ -157,7 +145,8 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             return;
         }
 
-        client = new Client(name, surname, number, Date.valueOf(date), vip, point.latitude(), point.longitude(), image);
+        client = new Client(name, surname, number, date, vip
+                , point.latitude(), point.longitude(), image, favourite);
         presenter.registerClient(client);
         onBackPressed();
     }
@@ -226,7 +215,7 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             Picasso.get()
                     .load(filePath)
                     .into(imageView);
-            image = uriToByteArray(filePath);
+            image = filePath.toString();
         }
     }
     private void openGallery() {

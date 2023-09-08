@@ -13,9 +13,9 @@ public class ClientUpdatePresenter implements ClientUpdateContract.Presenter,
     ClientUpdateContract.Model.OnUpdateClientListener{
 
     private ClientUpdateModel model;
-    private ClientUpdateView view;
+    private ClientUpdateContract.View view;
 
-    public ClientUpdatePresenter(ClientUpdateView view) {
+    public ClientUpdatePresenter(ClientUpdateContract.View view) {
         model = new ClientUpdateModel();
         this.view = view;
     }

@@ -11,9 +11,9 @@ public class ClientListPresenter implements ClientListContract.Presenter
         ,ClientListContract.Model.OnLoadClientsListener  {
 
     private ClientListModel model;
-    private ClientListView view;
+    private ClientListContract.View view;
 
-    public ClientListPresenter(ClientListView view) {
+    public ClientListPresenter(ClientListContract.View view) {
         this.view = view;
         this.model = new ClientListModel();
 

@@ -9,9 +9,9 @@ public class ClientDetailsPresenter implements ClientDetailsContract.Presenter,
     ClientDetailsContract.Model.OnLoadClientListener{
 
     private ClientDetailsModel model;
-    private ClientDetailsView view;
+    private ClientDetailsContract.View view;
 
-    public ClientDetailsPresenter(ClientDetailsView view) {
+    public ClientDetailsPresenter(ClientDetailsContract.View view) {
         this.view = view;
         model = new ClientDetailsModel();
     }
@@ -20,6 +20,12 @@ public class ClientDetailsPresenter implements ClientDetailsContract.Presenter,
     public void loadClientById(long clientId) {
         model.loadClientById(clientId, this);
     }
+
+    @Override
+    public void getClientDetails(long clientId) {
+        loadClientById(clientId);
+    }
+
 
     @Override
     public void onLoadClientSuccess(Client client) {

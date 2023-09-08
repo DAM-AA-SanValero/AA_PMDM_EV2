@@ -7,20 +7,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.svalero.cybershopapp.api.CybershopApi;
+import com.svalero.cybershopapp.api.CybershopApiInterface;
 import com.svalero.cybershopapp.contract.ClientDeleteContract;
 import com.svalero.cybershopapp.presenter.ClientDeletePresenter;
 import com.svalero.cybershopapp.view.ClientDetailsView;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.view.ClientUpdateView;
 import com.svalero.cybershopapp.domain.Client;
-
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHolder>
     implements ClientDeleteContract.View {
@@ -33,6 +39,7 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
     public ClientAdapter(List<Client> clientList, Context context) {
         this.clientList = clientList;
         this.context = context;
+
         presenter = new ClientDeletePresenter(this);
     }
 
@@ -49,10 +56,15 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
 
     @Override
     public void onBindViewHolder(ClientHolder holder, int position) {
-        holder.clientName.setText(clientList.get(position).getName());
-        holder.clientSurname.setText(clientList.get(position).getSurname());
-        holder.clientNumber.setText(String.valueOf(clientList.get(position).getNumber()));
+        Client currentClient = clientList.get(position);
+        holder.clientName.setText(currentClient.getName());
+        holder.clientSurname.setText(currentClient.getSurname());
+        holder.clientNumber.setText(String.valueOf(currentClient.getNumber()));
+
+        boolean isFavorite = currentClient.getFavourite() != null && currentClient.getFavourite();
+        holder.favoriteImageView.setImageResource(isFavorite ? R.drawable.star : R.drawable.staroff);
     }
+
 
     @Override
     public int getItemCount() {
@@ -74,7 +86,7 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
         public TextView clientSurname;
         public TextView clientNumber;
         public View parentView;
-
+        public ImageView favoriteImageView;
         public Button detailsButton;
         public Button updateButton;
         public Button deleteButton;
@@ -84,6 +96,7 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
             parentView = view;
             snackBarView = parentView;
 
+
             clientName = view.findViewById(R.id.clientName);
             clientSurname = view.findViewById(R.id.clientSurname);
             clientNumber = view.findViewById(R.id.clientNumber);
@@ -91,11 +104,42 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
             detailsButton = view.findViewById(R.id.detailsButton);
             updateButton = view.findViewById(R.id.updateButton);
             deleteButton = view.findViewById(R.id.deleteButton);
-
+            favoriteImageView = view.findViewById(R.id.isFavourite);
 
             detailsButton.setOnClickListener(v -> seeClient(getAdapterPosition()));
             updateButton.setOnClickListener(v -> updateClient(getAdapterPosition()));
             deleteButton.setOnClickListener(v -> deleteClient(getAdapterPosition()));
+            favoriteImageView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                Client client = clientList.get(position);
+                Boolean currentFavoriteStatus = client.getFavourite();
+                if (currentFavoriteStatus == null) {
+                    currentFavoriteStatus = false;
+                }
+                client.setFavourite(!currentFavoriteStatus);
+                notifyDataSetChanged();
+
+                CybershopApiInterface cybershopApi = new CybershopApi().buildInstance();
+                Call<Client> call = cybershopApi.updateClient(client.getId(), client);
+                call.enqueue(new Callback<Client>() {
+                    @Override
+                    public void onResponse(Call<Client> call, Response<Client> response) {
+                        if (response.isSuccessful()) {
+                        } else {
+                            client.setFavourite(!client.getFavourite());
+                            notifyDataSetChanged();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Client> call, Throwable t) {
+                        client.setFavourite(!client.getFavourite());
+                        Snackbar.make(view, "Fallo", Snackbar.LENGTH_SHORT).show();
+
+                        notifyDataSetChanged();
+
+                    }
+                });
+            });
 
         }
     }
@@ -129,7 +173,4 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
         dialog.show();
 
     }
-
-
-
 }
