@@ -17,7 +17,9 @@ import com.google.android.material.snackbar.Snackbar;
 import com.svalero.cybershopapp.api.CybershopApi;
 import com.svalero.cybershopapp.api.CybershopApiInterface;
 import com.svalero.cybershopapp.contract.ClientDeleteContract;
+import com.svalero.cybershopapp.contract.ClientUpdateContract;
 import com.svalero.cybershopapp.presenter.ClientDeletePresenter;
+import com.svalero.cybershopapp.presenter.ClientUpdatePresenter;
 import com.svalero.cybershopapp.view.ClientDetailsView;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.view.ClientUpdateView;
@@ -75,7 +77,6 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
     public void showError(String errorMessage) {
         Snackbar.make(snackBarView, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
     }
-
     @Override
     public void showMessage(String message) {
         Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();

@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,12 +30,12 @@ public class Repair {
     private String shippingAddress;
 
     @ColumnInfo
-    private java.sql.Date shipmentDate;
+    private LocalDate shipmentDate;
 
     @ColumnInfo
-    private java.sql.Date repairedDate;
+    private LocalDate repairedDate;
 
-    public Repair(String component, String price, String shippingAddress, Date shipmentDate, Date repairedDate) {
+    public Repair(String component, String price, String shippingAddress, LocalDate shipmentDate, LocalDate repairedDate) {
         this.component = component;
         this.price = price;
         this.shippingAddress = shippingAddress;
@@ -74,19 +75,19 @@ public class Repair {
         this.shippingAddress = shippingAddress;
     }
 
-    public Date getShipmentDate() {
+    public LocalDate getShipmentDate() {
         return shipmentDate;
     }
 
-    public void setShipmentDate(Date shipmentDate) {
+    public void setShipmentDate(LocalDate shipmentDate) {
         this.shipmentDate = shipmentDate;
     }
 
-    public Date getRepairedDate() {
+    public LocalDate getRepairedDate() {
         return repairedDate;
     }
 
-    public void setRepairedDate(Date repairedDate) {
+    public void setRepairedDate(LocalDate repairedDate) {
         this.repairedDate = repairedDate;
     }
 }

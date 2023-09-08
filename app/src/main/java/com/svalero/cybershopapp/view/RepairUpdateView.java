@@ -16,21 +16,28 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.svalero.cybershopapp.R;
+import com.svalero.cybershopapp.contract.RepairDetailsContract;
 import com.svalero.cybershopapp.contract.RepairUpdateContract;
 import com.svalero.cybershopapp.domain.Repair;
+import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
+import com.svalero.cybershopapp.presenter.RepairDetailsPresenter;
 import com.svalero.cybershopapp.presenter.RepairUpdatePresenter;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class RepairUpdateView extends AppCompatActivity implements RepairUpdateContract.View {
+public class RepairUpdateView extends AppCompatActivity implements RepairUpdateContract.View,
+        RepairDetailsContract.View {
 
     private RepairUpdatePresenter presenter;
+    private RepairDetailsPresenter presenterDetails;
     private TextView tvComponent, tvPrice, tvShipmentAddress, tvShipmentDate, tvRepairedDate;
     private EditText etComponent, etPrice, etShipmentAddress, etShipmentDate, etRepairedDate;
     long repairId;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,35 +45,34 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
 
         initializeViews();
 
-        etShipmentDate.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(RepairUpdateView.this, (view, year1, month1, dayOfMonth) -> {
-                String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-                etShipmentDate.setText(date);
-            }, year, month, day);
-            datePickerDialog.show();
-        });
-        etRepairedDate.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(RepairUpdateView.this, (view, year1, month1, dayOfMonth) -> {
-                String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-                etRepairedDate.setText(date);
-            }, year, month, day);
-            datePickerDialog.show();
-        });
+        etShipmentDate.setOnClickListener(v -> showDatePickerDialog(etShipmentDate));
+        etRepairedDate.setOnClickListener(v -> showDatePickerDialog(etRepairedDate));
 
         presenter = new RepairUpdatePresenter(this);
+        presenterDetails = new RepairDetailsPresenter(this);
 
         repairId = getIntent().getLongExtra("repair_id", -1);
         if (repairId == -1) return;
+        presenterDetails.getRepairDetails(repairId);
+    }
+
+    private void showDatePickerDialog(EditText targetEditText) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                RepairUpdateView.this,
+                (view, year1, month1, dayOfMonth) -> {
+                    LocalDate selectedDate = LocalDate.of(year1, month1 + 1, dayOfMonth);
+                    targetEditText.setText(selectedDate.format(formatter));
+                },
+                year,
+                month,
+                day
+        );
+        datePickerDialog.show();
     }
     private void initializeViews() {
         tvComponent = findViewById(R.id.etComponent);
@@ -82,45 +88,34 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
         etRepairedDate = findViewById(R.id.etRepairDate);
 
     }
-    private void showRepairDetails(Repair repair) {
+    public void showRepairDetails(Repair repair) {
+        repairId = repair.getId();
         tvComponent.setText(repair.getComponent());
         tvPrice.setText(repair.getPrice());
         tvShipmentAddress.setText(repair.getShippingAddress());
-        tvShipmentDate.setText(String.valueOf(repair.getShipmentDate()));
-        tvRepairedDate.setText(String.valueOf(repair.getRepairedDate()));
+        tvShipmentDate.setText(repair.getShipmentDate().format(formatter));
+        tvRepairedDate.setText(repair.getRepairedDate().format(formatter));
     }
+
+    @Override
+    public void showMessage(String message) {
+
+    }
+
     public void updateButton(View view){
         String newComponent = etComponent.getText().toString();
         String newPrice = etPrice.getText().toString();
         String newShipAddress = etShipmentAddress.getText().toString();
-        String newShipDate = etShipmentDate.getText().toString();
-        String newRepairedDate = etRepairedDate.getText().toString();
+        LocalDate newShipDate = LocalDate.parse(etShipmentDate.getText().toString(), formatter);
+        LocalDate newRepairedDate = LocalDate.parse(etRepairedDate.getText().toString(), formatter);
 
-        String sqlShipDate = convertDateToSqlFormat(newShipDate);
-        String sqlRepairedDate = convertDateToSqlFormat(newRepairedDate);
-
-        Date dbShipmentDate = Date.valueOf(sqlShipDate);
-        Date dbRepairedDate = Date.valueOf(sqlRepairedDate);
 
         presenter.updateRepair(repairId, new Repair(newComponent, newPrice, newShipAddress,
-                dbShipmentDate, dbRepairedDate));
+                newShipDate, newRepairedDate));
 
         onBackPressed();
     }
     public void cancelButton(View view){onBackPressed();}
-
-
-    private String convertDateToSqlFormat(String dateInOriginalFormat) {
-        try {
-            SimpleDateFormat originalFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            SimpleDateFormat sqlFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            java.util.Date date = originalFormat.parse(dateInOriginalFormat);
-            return sqlFormat.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

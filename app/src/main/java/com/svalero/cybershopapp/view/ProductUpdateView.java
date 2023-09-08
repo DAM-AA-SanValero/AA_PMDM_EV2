@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,18 +17,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ProductDetailsContract;
 import com.svalero.cybershopapp.contract.ProductUpdateContract;
 import com.svalero.cybershopapp.domain.Product;
-import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
 import com.svalero.cybershopapp.presenter.ProductDetailsPresenter;
 import com.svalero.cybershopapp.presenter.ProductUpdatePresenter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 
 public class ProductUpdateView extends AppCompatActivity implements ProductUpdateContract.View,

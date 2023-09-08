@@ -16,19 +16,19 @@ public class Client {
     private String name;
     private String surname;
     private String number;
-    private String register_date;
+    private LocalDate registerDate;
     private boolean vip;
     private double latitude;
     private double longitude;
     private String image;
     private Boolean favourite;
 
-    public Client(String name, String surname, String number, String register_date,
+    public Client(String name, String surname, String number, LocalDate registerDate,
                   boolean vip, double latitude, double longitude, String image, Boolean isFavourite) {
         this.name = name;
         this.surname = surname;
         this.number = number;
-        this.register_date = register_date;
+        this.registerDate = registerDate;
         this.vip = vip;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -68,12 +68,12 @@ public class Client {
         this.number = number;
     }
 
-    public String getRegister_date() {
-        return register_date;
+    public LocalDate getRegisterDate() {
+        return registerDate;
     }
 
-    public void setRegister_date(String register_date) {
-        this.register_date = register_date;
+    public void setRegisterDate(LocalDate registerDate) {
+        this.registerDate = registerDate;
     }
 
     public boolean isVip() {

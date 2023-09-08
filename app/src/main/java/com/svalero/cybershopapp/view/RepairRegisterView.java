@@ -24,7 +24,8 @@ import com.svalero.cybershopapp.contract.RepairRegisterContract;
 import com.svalero.cybershopapp.domain.Repair;
 import com.svalero.cybershopapp.presenter.RepairRegisterPresenter;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
 import java.util.Locale;
@@ -34,6 +35,7 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
     private RepairRegisterPresenter presenter;
     private Repair repair;
     private EditText etComponent, etPrice, etShipmentAddress, etShipmentDate, etRepairedDate;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +64,8 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String selectedDate = selectedYear + "-" + (selectedMonth + 1) + "-" + selectedDay;
-                    etShipmentDate.setText(selectedDate);
+                    LocalDate selectedDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay);
+                    etShipmentDate.setText(selectedDate.format(formatter));
                 },
                 year,
                 month,
@@ -82,8 +84,8 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String selectedDate = selectedYear + "-" + (selectedMonth + 1) + "-" + selectedDay;
-                    etRepairedDate.setText(selectedDate);
+                    LocalDate selectedDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay);
+                    etRepairedDate.setText(selectedDate.format(formatter));
                 },
                 year,
                 month,
@@ -107,17 +109,12 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
             Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
+        LocalDate shipDate = shipmentDate.isEmpty() ? LocalDate.of(0000, 01, 01) : LocalDate.parse(shipmentDate, formatter);
+        LocalDate repairDate = repairedDate.isEmpty() ? LocalDate.of(0000, 01, 01) : LocalDate.parse(repairedDate, formatter);
 
-        if (shipmentDate.isEmpty()){
-            shipmentDate = "0000-01-01";
-        }
-
-        if (repairedDate.isEmpty()){
-            repairedDate = "0000-01-01";
-        }
 
         repair = new Repair(component, price, shipmentAddress,
-                Date.valueOf(shipmentDate), Date.valueOf(repairedDate));
+                shipDate, repairDate);
         presenter.registerRepair(repair);
         onBackPressed();
     }

@@ -10,11 +10,13 @@ import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.MapView;
@@ -29,8 +31,8 @@ import com.svalero.cybershopapp.contract.ClientDetailsContract;
 import com.svalero.cybershopapp.domain.Client;
 import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
 
-import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class ClientDetailsView extends AppCompatActivity implements ClientDetailsContract.View {
@@ -38,6 +40,8 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
     private ClientDetailsPresenter presenter;
     private MapView mapView;
     private PointAnnotationManager pointAnnotationManager;
+    private ImageView imageView;
+    private String image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,7 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
     }
     @Override
     public void showClientDetails(Client client) {
-        ImageView imageView = findViewById(R.id.clientPhoto);
+        imageView = findViewById(R.id.clientPhoto);
         TextView tvName = findViewById(R.id.clientName);
         TextView tvSurname = findViewById(R.id.clientSurname);
         TextView tvNumber = findViewById(R.id.clientNumber);
@@ -64,11 +68,12 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         tvName.setText(client.getName());
         tvSurname.setText(client.getSurname());
         tvNumber.setText(String.valueOf(client.getNumber()));
-        String registerDate = client.getRegister_date();
+        LocalDate registerDate = client.getRegisterDate();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault());
 
         if(registerDate != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            String formattedDate = sdf.format(client.getRegister_date());
+            String formattedDate = registerDate.format(formatter);
             tvDate.setText(formattedDate);
         } else {
             tvDate.setText(R.string.UnknownRegistering);
@@ -77,15 +82,21 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         boolean isVip = client.isVip();
         tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
 
-        String image = client.getImage();
-        if (image != null && !image.isEmpty()) {
-            imageView.setImageURI(Uri.parse(image));
-        } else {
+        image = client.getImage();
+
+        if(image != null && !image.isEmpty()) {
+            Glide.with(this)
+                    .load(image)
+                    .into(imageView);
+        } else{
             imageView.setImageResource(R.drawable.person);
         }
 
         initializePointManager();
         addClientToMap(client);
+
+
+
     }
 
 

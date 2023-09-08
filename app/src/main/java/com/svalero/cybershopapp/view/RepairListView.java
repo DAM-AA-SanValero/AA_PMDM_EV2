@@ -56,7 +56,6 @@ public class RepairListView extends AppCompatActivity implements RepairListContr
 
     @Override
     public void showRepairs(List<Repair> repairs) {
-        Log.d("UI_UPDATE", "Actualizando UI con " + (repairs != null ? repairs.size() : "null") + " reparaciones.");
         repairList.clear();
         repairList.addAll(repairs);
         repairAdapter.notifyDataSetChanged();

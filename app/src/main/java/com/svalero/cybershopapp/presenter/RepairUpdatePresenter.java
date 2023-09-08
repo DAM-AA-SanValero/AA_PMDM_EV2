@@ -13,9 +13,9 @@ public class RepairUpdatePresenter implements RepairUpdateContract.Presenter,
     RepairUpdateContract.Model.OnUpdateRepairListener{
 
     private RepairUpdateModel model;
-    private RepairUpdateView view;
+    private RepairUpdateContract.View view;
 
-    public RepairUpdatePresenter(RepairUpdateView view) {
+    public RepairUpdatePresenter(RepairUpdateContract.View view) {
         model = new RepairUpdateModel();
         this.view = view;
     }

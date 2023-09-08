@@ -73,7 +73,7 @@
             android:layout_marginBottom="10dp"
             android:ems="10"
             android:hint="@string/address"
-            android:inputType="number"
+            android:inputType="text"
             android:minHeight="48dp" />
 
         <com.google.android.material.textfield.TextInputLayout

@@ -22,5 +22,7 @@ public interface RepairDetailsContract {
     interface Presenter {
         void loadRepairById(long id);
 
+        void getRepairDetails(long repairId);
+
     }
 }

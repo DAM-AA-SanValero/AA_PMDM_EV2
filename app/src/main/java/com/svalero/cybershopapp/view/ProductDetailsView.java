@@ -1,7 +1,6 @@
 package com.svalero.cybershopapp.view;
 
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -42,7 +41,7 @@ public class ProductDetailsView extends AppCompatActivity implements ProductDeta
 
     public void showProductDetails(Product product) {
 
-        imageView = findViewById(R.id.productPhoto);
+        imageView = findViewById(R.id.clientPhoto);
         TextView tvName = findViewById(R.id.name);
         TextView tvType = findViewById(R.id.type);
         TextView tvPrice = findViewById(R.id.price);

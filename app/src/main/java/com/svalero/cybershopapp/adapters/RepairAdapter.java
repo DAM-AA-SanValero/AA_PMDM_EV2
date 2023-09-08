@@ -3,7 +3,6 @@ package com.svalero.cybershopapp.adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.SimpleDateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +21,9 @@ import com.svalero.cybershopapp.view.RepairDetailsView;
 import com.svalero.cybershopapp.view.RepairUpdateView;
 import com.svalero.cybershopapp.domain.Repair;
 
-import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +36,9 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
     public List<Repair> repairList;
     public Context context;
     RepairAdapter repairAdapter;
+
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
 
     public RepairAdapter(List<Repair> repairList, Context context) {
         this.repairList = repairList;
@@ -53,17 +57,15 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
     public void onBindViewHolder(@NonNull RepairAdapter.RepairHolder holder, int position) {
         holder.repairComponent.setText(repairList.get(position).getComponent());
         holder.repairAddress.setText(repairList.get(position).getShippingAddress());
-        holder.repairedDate.setText(String.valueOf(repairList.get(position).getRepairedDate()));
 
 
-        Date repairedDate = repairList.get(position).getRepairedDate();
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        LocalDate repairedDate = repairList.get(position).getRepairedDate();
         if(repairedDate != null) {
-            String repairedDateString = format.format(repairedDate);
+            String repairedDateString = repairedDate.format(dateFormatter);
             if ("01/01/0001".equals(repairedDateString)) {
                 holder.repairedDate.setText(context.getString(R.string.not_repaired));
             } else {
-                holder.repairedDate.setText(context.getString(R.string.repaired));
+                holder.repairedDate.setText(context.getString(R.string.repaired) + " " + repairedDateString);
             }
         } else {
             holder.repairedDate.setText(context.getString(R.string.not_repaired));
@@ -119,7 +121,7 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
     public void seeRepair(int position){
         Repair repair = repairList.get(position);
         Intent intent = new Intent(context, RepairDetailsView.class);
-        intent.putExtra("repair_id", repair.getComponent());
+        intent.putExtra("repair_id", repair.getId());
         context.startActivity(intent);
 
 

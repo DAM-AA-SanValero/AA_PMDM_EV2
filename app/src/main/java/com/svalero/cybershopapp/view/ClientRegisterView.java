@@ -19,6 +19,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.android.gestures.MoveGestureDetector;
@@ -34,7 +36,6 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPlugin;
 import com.mapbox.maps.plugin.gestures.GesturesUtils;
 import com.mapbox.maps.plugin.gestures.OnMoveListener;
-import com.squareup.picasso.Picasso;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ClientRegisterContract;
 import com.svalero.cybershopapp.domain.Client;
@@ -43,6 +44,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -60,6 +62,7 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
     private Point point;
     private PointAnnotationManager pointAnnotationManager;
     private String image;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +78,10 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         cbVIP = findViewById(R.id.cbVip);
         clientMap = findViewById(R.id.clientMap);
         scrollView = findViewById(R.id.scrollView);
-        imageView = findViewById(R.id.productPhoto);
+        imageView = findViewById(R.id.clientPhoto);
         imageView.setOnClickListener(v -> openGallery());
 
+        etDate.setOnClickListener(V -> showDatePickerDialog());
 
         GesturesPlugin gesturesPlugin = GesturesUtils.getGestures(clientMap);
         gesturesPlugin.addOnMapClickListener(point -> {
@@ -103,7 +107,7 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         });
         initializePointManager();
 
-        etDate.setOnClickListener(V -> showDatePickerDialog());
+
     }
 
     private void showDatePickerDialog() {
@@ -115,8 +119,8 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    LocalDate localDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay);
-                    etDate.setText(localDate.toString());
+                    LocalDate selectedDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay);
+                    etDate.setText(selectedDate.format(formatter));
                 },
                 year,
                 month,
@@ -131,11 +135,11 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         String name = etName.getText().toString();
         String surname = etSurname.getText().toString();
         String number = etNumber.getText().toString();
-        String date = etDate.getText().toString().trim();
+        String dateString = etDate.getText().toString();
         boolean vip = cbVIP.isChecked();
         boolean favourite = false;
 
-        if (name.isEmpty() || surname.isEmpty() || number.isEmpty() || date.isEmpty()){
+        if (name.isEmpty() || surname.isEmpty() || number.isEmpty() || dateString.isEmpty()){
             Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
@@ -144,6 +148,9 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             Snackbar.make(this.getCurrentFocus(), R.string.select_the_correct_location, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
+
+        LocalDate date = dateString.isEmpty() ? LocalDate.of(0000, 01, 01)
+                : LocalDate.parse(dateString, formatter);
 
         client = new Client(name, surname, number, date, vip
                 , point.latitude(), point.longitude(), image, favourite);
@@ -208,16 +215,6 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         pointAnnotationManager.deleteAll();
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri filePath = data.getData();
-            Picasso.get()
-                    .load(filePath)
-                    .into(imageView);
-            image = filePath.toString();
-        }
-    }
     private void openGallery() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -225,6 +222,16 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_profile_image)), SELECT_PICTURE);
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri filePath = data.getData();
+            Glide.with(this)
+                    .load(filePath)
+                    .into(imageView);
+            image = filePath.toString();
+        }
+    }
     private byte[] uriToByteArray(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);

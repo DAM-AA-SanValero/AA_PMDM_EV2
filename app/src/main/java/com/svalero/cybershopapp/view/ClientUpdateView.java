@@ -5,19 +5,23 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
@@ -40,6 +44,8 @@ import com.svalero.cybershopapp.presenter.ClientDetailsPresenter;
 import com.svalero.cybershopapp.presenter.ClientUpdatePresenter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -48,6 +54,7 @@ import java.util.Locale;
 public class ClientUpdateView extends AppCompatActivity implements ClientUpdateContract.View,
         ClientDetailsContract.View {
 
+    private static final int SELECT_PICTURE = 100;
     private ClientDetailsPresenter presenterDetails;
     private ClientUpdatePresenter presenter;
     private EditText etName, etSurname, etNumber, etDate;
@@ -55,11 +62,14 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
     private ScrollView scrollView;
     private Point point;
     private PointAnnotationManager pointAnnotationManager;
-
-
+    private String image;
+    private ImageView imageView;
     private CheckBox cbVip;
     private Boolean favouriteValue = null;
+    private double currentLatitude;
+    private double currentLongitude;
 
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     long clientId;
 
     @Override
@@ -68,22 +78,37 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         setContentView(R.layout.client_update_view);
 
         initializeViews();
+
+        etDate.setOnClickListener(v -> showDatePickerDialog(etDate));
+
         presenter = new ClientUpdatePresenter(this);
         presenterDetails = new ClientDetailsPresenter(this);
 
         clientId = getIntent().getLongExtra("client_id", -1);
         if (clientId == -1) return;
-        presenterDetails.getClientDetails(clientId);;
+        presenterDetails.getClientDetails(clientId);
 
-
-
-        etDate.setOnClickListener(v -> showDatePickerDialog());
         findViewById(R.id.updateBtn).setOnClickListener(this::updateButton);
         findViewById(R.id.cancelBtn).setOnClickListener(this::cancelButton);
     }
+
+    private void showDatePickerDialog(EditText targetEditText) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                ClientUpdateView.this,
+                (view, year1, month1, dayOfMonth) -> {
+            LocalDate selectedDate = LocalDate.of(year1, month1 + 1, dayOfMonth);
+            targetEditText.setText(selectedDate.toString());
+        }, year, month, day);
+        datePickerDialog.show();
+    }
     private void initializeViews() {
         scrollView = findViewById(R.id.scrollView);
-
+        imageView = findViewById(R.id.clientPhoto);
         etName = findViewById(R.id.etName);
         etSurname = findViewById(R.id.etSurname);
         etNumber = findViewById(R.id.etNumber);
@@ -120,15 +145,33 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
 
     public void showClientDetails(Client client) {
         clientId = client.getId();
+
         etName.setText(client.getName());
         etSurname.setText(client.getSurname());
         etNumber.setText(String.valueOf(client.getNumber()));
-        etDate.setText(client.getRegister_date());
+        if (client.getRegisterDate() != null) {
+            etDate.setText(client.getRegisterDate().format(formatter));
+        } else {
+            etDate.setText("Fecha nula");
+        }
         cbVip.setChecked(client.isVip());
+        currentLatitude = client.getLatitude();
+        currentLongitude = client.getLongitude();
         favouriteValue = client.getFavourite();
+
+        image = client.getImage();
+
+        if(image != null && !image.isEmpty()) {
+            Glide.with(this)
+                    .load(image)
+                    .into(imageView);
+        }
+        imageView.setOnClickListener(v -> openGallery());
 
         initializePointManager();
         addClientToMap(client);
+
+
     }
 
     @Override
@@ -142,10 +185,10 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         String newName = etName.getText().toString();
         String newSurname = etSurname.getText().toString();
         String newNumber = etNumber.getText().toString();
-        String newDate = etDate.getText().toString();
         boolean status = cbVip.isChecked();
-        double latitude = (this.point != null) ? this.point.latitude() : 0.0;
-        double longitude = (this.point != null) ? this.point.longitude() : 0.0;
+        double latitude = (this.point != null) ? this.point.latitude() : currentLatitude;
+        double longitude = (this.point != null) ? this.point.longitude() : currentLongitude;
+        LocalDate newDate = LocalDate.parse(etDate.getText().toString(), formatter);
 
         if (!newName.isEmpty() && !newSurname.isEmpty() && !newNumber.isEmpty()) {
 
@@ -159,27 +202,21 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
 
     public void cancelButton(View view){onBackPressed();}
 
-    private void showDatePickerDialog() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(ClientUpdateView.this, (view, year1, month1, dayOfMonth) -> {
-            LocalDate selectedDate = LocalDate.of(year1, month1 + 1, dayOfMonth);
-            etDate.setText(selectedDate.toString());
-        }, year, month, day);
-        datePickerDialog.show();
+    private void openGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_profile_image)), SELECT_PICTURE);
     }
-    private String convertDateToSqlFormat(String dateInOriginalFormat) {
-        try {
-            SimpleDateFormat originalFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            SimpleDateFormat sqlFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date date = originalFormat.parse(dateInOriginalFormat);
-            return sqlFormat.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri filePath = data.getData();
+            Glide.with(this)
+                    .load(filePath)
+                    .into(imageView);
+            image = filePath.toString();
         }
     }
     @Override

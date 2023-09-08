@@ -17,7 +17,8 @@ import com.svalero.cybershopapp.domain.Repair;
 import com.svalero.cybershopapp.presenter.RepairDetailsPresenter;
 
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class RepairDetailsView extends AppCompatActivity implements RepairDetailsContract.View {
@@ -30,8 +31,6 @@ public class RepairDetailsView extends AppCompatActivity implements RepairDetail
         setContentView(R.layout.repair_details_view);
 
         presenter = new RepairDetailsPresenter(this);
-
-
         long repairId = getIntent().getLongExtra("repair_id", -1);
         if (repairId != -1) {
             presenter.loadRepairById(repairId);
@@ -49,30 +48,31 @@ public class RepairDetailsView extends AppCompatActivity implements RepairDetail
         tvComponent.setText(repair.getComponent());
         tvPrice.setText(repair.getPrice());
         tvShipmentAddress.setText(repair.getShippingAddress());
-        Date shipmentDate = repair.getShipmentDate();
-        Date repairedDate = repair.getRepairedDate();
+        LocalDate shipmentDate = repair.getShipmentDate();
+        LocalDate repairedDate = repair.getRepairedDate();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        if(shipmentDate != null) {
-            String formattedDate = sdf.format(repair.getShipmentDate());
+        if (shipmentDate != null) {
+            String formattedDate = shipmentDate.format(formatter);
             tvShipmentDate.setText(formattedDate);
+
+            if (formattedDate.equals("01/01/0001")) {
+                tvShipmentDate.setText(R.string.not_shipped);
+            }
         } else {
             tvShipmentDate.setText(R.string.UnknownRegistering);
         }
 
-        if(shipmentDate.equals("01/01/0001")){
-            tvShipmentDate.setText(R.string.not_shipped);
-        }
-
-        if(repairedDate != null){
-            String formattedDate = sdf.format(repair.getRepairedDate());
+        if (repairedDate != null) {
+            String formattedDate = repairedDate.format(formatter);
             tvRepairedDate.setText(formattedDate);
+
+            if (formattedDate.equals("01/01/0001")) {
+                tvRepairedDate.setText(R.string.not_repaired);
+            }
         } else {
             tvRepairedDate.setText(R.string.UnknownRegistering);
-        }
-        if(repairedDate.equals("01/01/0001")){
-            tvRepairedDate.setText(R.string.not_repaired);
         }
     }
 

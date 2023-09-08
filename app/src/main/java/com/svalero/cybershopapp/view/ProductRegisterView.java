@@ -21,7 +21,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
-import com.squareup.picasso.Picasso;
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ProductRegisterContract;
 import com.svalero.cybershopapp.domain.Product;
@@ -54,7 +53,7 @@ public class ProductRegisterView extends AppCompatActivity implements ProductReg
         etPrice = findViewById(R.id.etPrice);
         etOrigin = findViewById(R.id.etOrigin);
         cbStock = findViewById(R.id.cbStock);
-        imageView = findViewById(R.id.productPhoto);
+        imageView = findViewById(R.id.clientPhoto);
 
         imageView.setOnClickListener(v -> openGallery());
     }

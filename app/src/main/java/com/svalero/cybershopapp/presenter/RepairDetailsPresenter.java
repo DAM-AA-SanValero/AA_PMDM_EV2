@@ -9,9 +9,9 @@ public class RepairDetailsPresenter implements RepairDetailsContract.Presenter,
     RepairDetailsContract.Model.OnLoadRepairListener{
 
     private RepairDetailsModel model;
-    private RepairDetailsView view;
+    private RepairDetailsContract.View view;
 
-    public RepairDetailsPresenter(RepairDetailsView view) {
+    public RepairDetailsPresenter(RepairDetailsContract.View view) {
         this.view = view;
         model = new RepairDetailsModel();
     }
@@ -19,6 +19,11 @@ public class RepairDetailsPresenter implements RepairDetailsContract.Presenter,
     @Override
     public void loadRepairById(long repairId) {
         model.loadRepairById(repairId, this);
+    }
+
+    @Override
+    public void getRepairDetails(long repairId) {
+        loadRepairById(repairId);
     }
 
     @Override
