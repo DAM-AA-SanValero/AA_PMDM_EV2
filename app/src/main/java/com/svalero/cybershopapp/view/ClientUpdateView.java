@@ -180,7 +180,7 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         double longitude = (this.point != null) ? this.point.longitude() : currentLongitude;
         LocalDate newDate = LocalDate.parse(etDate.getText().toString(), formatter);
 
-        if (numberString.length() > 9) {
+        if (numberString.length() != 9) {
             Snackbar.make(this.getCurrentFocus(), R.string.phoneNumberDigits, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }

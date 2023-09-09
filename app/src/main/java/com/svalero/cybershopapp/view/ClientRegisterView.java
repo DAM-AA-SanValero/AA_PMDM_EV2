@@ -149,7 +149,7 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             return;
         }
 
-        if (numberString.length() > 9) {
+        if (numberString.length() != 9) {
             Snackbar.make(this.getCurrentFocus(), R.string.phoneNumberDigits, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
