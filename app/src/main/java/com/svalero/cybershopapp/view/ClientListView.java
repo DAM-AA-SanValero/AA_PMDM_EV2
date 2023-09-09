@@ -63,9 +63,11 @@ public class ClientListView extends AppCompatActivity implements ClientListContr
     }
 
     @Override
-    public void showMessage(String message) {
-
+    public void showErrorMessage(String message) {
+        showErrorMessage(getString(R.string.error_listing_data));
     }
+
+    //MAPA
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -93,9 +95,9 @@ public class ClientListView extends AppCompatActivity implements ClientListContr
     }
 
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:

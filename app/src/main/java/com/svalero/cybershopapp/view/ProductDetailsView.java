@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +22,7 @@ import com.svalero.cybershopapp.presenter.ProductDetailsPresenter;
 import java.util.Locale;
 
 public class ProductDetailsView extends AppCompatActivity implements ProductDetailsContract.View {
+
     private ProductDetailsPresenter presenter;
 
     private ImageView imageView;
@@ -62,14 +64,12 @@ public class ProductDetailsView extends AppCompatActivity implements ProductDeta
             Glide.with(this)
                     .load(image)
                     .into(imageView);
-            Log.d("ProductDetails", "Loading image: " + image);
-
         }
     }
 
     @Override
     public void showErrorMessage(String message) {
-
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -90,9 +90,9 @@ public class ProductDetailsView extends AppCompatActivity implements ProductDeta
     }
 
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:

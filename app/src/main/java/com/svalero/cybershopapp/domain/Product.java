@@ -14,25 +14,18 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class Product {
 
-    @PrimaryKey(autoGenerate = true)
     private long id;
-    @ColumnInfo
     private String name;
-    @ColumnInfo
     private String type;
-    @ColumnInfo
-    private String price;
-    @ColumnInfo
+    private float price;
     private String origin;
-    @ColumnInfo
     private boolean inStock;
-    @ColumnInfo
     private String image;
 
-    public Product(String name, String type, String price, String origin, boolean inStock, String image) {
+    public Product(String name, String type, float price,
+                   String origin, boolean inStock, String image) {
         this.name = name;
         this.type = type;
         this.price = price;
@@ -61,11 +54,11 @@ public class Product {
         this.type = type;
     }
 
-    public String getPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 

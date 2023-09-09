@@ -134,7 +134,7 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
                     @Override
                     public void onFailure(Call<Client> call, Throwable t) {
                         client.setFavourite(!client.getFavourite());
-                        Snackbar.make(view, "Fallo", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(view, R.string.fail_trying_to_mark_favourite, Snackbar.LENGTH_SHORT).show();
 
                         notifyDataSetChanged();
 
@@ -166,10 +166,10 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
                 .setPositiveButton(R.string.yes, (dialog, i) -> {
                   Client client = clientList.get(position);
                   presenter.deleteClient(client.getId());
+
                   clientList.remove(position);
                   notifyItemRemoved(position);
-                })
-                        .setNegativeButton(R.string.no, (dialog, id) -> dialog.dismiss());
+                }).setNegativeButton(R.string.no, (dialog, id) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.show();
 

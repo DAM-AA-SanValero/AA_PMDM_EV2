@@ -21,19 +21,24 @@ public class ClientRegisterModel implements ClientRegisterContract.Model {
             callClients.enqueue(new Callback<Client>() {
                 @Override
                 public void onResponse(Call<Client> call, Response<Client> response) {
-                    Client client = response.body();
-                    listener.onRegisterClientSuccess(client);
+                    if (response.isSuccessful()) {
+                        Client client = response.body();
+                        listener.onRegisterClientSuccess(client);
+                    } else {
+                        String errorMessage = "Error registering product";
+                        listener.onRegisterClientError(errorMessage);
+                    }
                 }
 
                 @Override
                 public void onFailure(Call<Client> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API Register Error";
                     listener.onRegisterClientError(message);
                 }
             });
 
-        } catch (SQLiteConstraintException sce){
+        } catch (SQLiteConstraintException sce) {
             sce.printStackTrace();
         }
 

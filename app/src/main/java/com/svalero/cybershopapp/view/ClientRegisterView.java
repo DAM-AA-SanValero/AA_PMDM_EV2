@@ -51,10 +51,11 @@ import java.util.Locale;
 
 public class ClientRegisterView extends AppCompatActivity implements ClientRegisterContract.View {
 
-    private ClientRegisterPresenter presenter;
     private Client client;
-    private ImageView imageView;
+    private ClientRegisterPresenter presenter;
+
     private static final int SELECT_PICTURE = 100;
+    private ImageView imageView;
     private EditText etName, etSurname, etNumber, etDate;
     private CheckBox cbVIP;
     private MapView clientMap;
@@ -106,8 +107,6 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             }
         });
         initializePointManager();
-
-
     }
 
     private void showDatePickerDialog() {
@@ -134,12 +133,12 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
 
         String name = etName.getText().toString();
         String surname = etSurname.getText().toString();
-        String number = etNumber.getText().toString();
+        int number = Integer.parseInt(etNumber.getText().toString());
         String dateString = etDate.getText().toString();
         boolean vip = cbVIP.isChecked();
         boolean favourite = false;
 
-        if (name.isEmpty() || surname.isEmpty() || number.isEmpty() || dateString.isEmpty()){
+        if (name.isEmpty() || surname.isEmpty() || number == 0 || dateString.isEmpty()){
             Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
@@ -158,20 +157,6 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         onBackPressed();
     }
 
-    public void cancelButton(View view){
-        onBackPressed();
-    }
-
-    @Override
-    public void showError(String errorMessage) {
-        Snackbar.make(etName, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void showMessage(String message) {
-         Toast.makeText(this, client_registered, Toast.LENGTH_LONG).show();
-
-    }
     @Override
     public void resetForm() {
         etName.setText("");
@@ -179,6 +164,23 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         etNumber.setText("");
         etDate.setText("");
     }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(this, client_registered, Toast.LENGTH_LONG).show();
+
+    }
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(etName, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+    public void cancelButton(View view){
+        onBackPressed();
+    }
+
+
+    //MAP
+
     private void addMarker(Point point) {
         PointAnnotationOptions pointAnnotationOptions = new PointAnnotationOptions()
                 .withPoint(point)
@@ -232,26 +234,8 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             image = filePath.toString();
         }
     }
-    private byte[] uriToByteArray(Uri uri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
-            int bufferSize = 1024;
-            byte[] buffer = new byte[bufferSize];
-
-            int len;
-            while ((len = inputStream.read(buffer)) != -1) {
-                byteBuffer.write(buffer, 0, len);
-            }
-            return byteBuffer.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
+    //ACTION BAR
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -271,10 +255,12 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
         return super.onOptionsItemSelected(item);
     }
 
+    //IDIOMA
+
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:

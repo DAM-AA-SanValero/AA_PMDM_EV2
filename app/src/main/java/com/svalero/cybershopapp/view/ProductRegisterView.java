@@ -30,16 +30,17 @@ import java.util.Locale;
 
 public class ProductRegisterView extends AppCompatActivity implements ProductRegisterContract.View {
 
-    private ProductRegisterPresenter presenter;
     private Product product;
-    private ImageView imageView;
+    private ProductRegisterPresenter presenter;
+
     private static final int SELECT_PICTURE = 100;
+    private String image;
+    private ImageView imageView;
     private EditText etName;
     private EditText etType;
     private EditText etPrice;
     private EditText etOrigin;
     private CheckBox cbStock;
-    private String image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +63,11 @@ public class ProductRegisterView extends AppCompatActivity implements ProductReg
 
         String name = etName.getText().toString();
         String type = etType.getText().toString();
-        String price = etPrice.getText().toString();
+        float price = Float.parseFloat(etPrice.getText().toString());
         String origin = etOrigin.getText().toString();
         boolean inStock = cbStock.isChecked();
 
-        if (name.isEmpty() || type.isEmpty() || price.isEmpty()){
+        if (name.isEmpty() || type.isEmpty() || price == 0.0){
             Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
@@ -75,26 +76,43 @@ public class ProductRegisterView extends AppCompatActivity implements ProductReg
         presenter.registerProduct(product);
         onBackPressed();
     }
-
-    public void cancelButton(View view){
-        onBackPressed();
-    }
-    @Override
-    public void showError(String errorMessage) {
-        Snackbar.make(etName, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void showMessage(String message) {
-        Toast.makeText(this, R.string.product_registered, Toast.LENGTH_LONG).show();
-    }
-
     @Override
     public void resetForm() {
         etName.setText("");
         etType.setText("");
         etPrice.setText("");
         etOrigin.setText("");
+    }
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(this, R.string.product_registered, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(etName, errorMessage, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
+    public void cancelButton(View view){
+        onBackPressed();
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_profile_image)), SELECT_PICTURE);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri filePath = data.getData();
+            Glide.with(this)
+                    .load(filePath)
+                    .into(imageView);
+            image = filePath.toString();
+        }
     }
 
 
@@ -117,9 +135,9 @@ public class ProductRegisterView extends AppCompatActivity implements ProductReg
     }
 
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:
@@ -142,28 +160,6 @@ public class ProductRegisterView extends AppCompatActivity implements ProductReg
                 .getDisplayMetrics());
         recreate();
     }
-
-    private void openGallery() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_profile_image)), SELECT_PICTURE);
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri filePath = data.getData();
-            Glide.with(this)
-                    .load(filePath)
-                    .into(imageView);
-            image = filePath.toString();
-        }
-    }
-
-
-
-
 }
 
 

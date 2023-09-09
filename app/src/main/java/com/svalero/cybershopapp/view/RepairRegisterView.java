@@ -32,8 +32,9 @@ import java.util.Locale;
 
 public class RepairRegisterView extends AppCompatActivity implements RepairRegisterContract.View {
 
-    private RepairRegisterPresenter presenter;
     private Repair repair;
+    private RepairRegisterPresenter presenter;
+
     private EditText etComponent, etPrice, etShipmentAddress, etShipmentDate, etRepairedDate;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -49,12 +50,58 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
         etShipmentAddress = findViewById(R.id.etAddress);
         etShipmentDate = findViewById(R.id.etShipDate);
         etRepairedDate = findViewById(R.id.etRepairDate);
-
         etShipmentDate.setOnClickListener(V -> showDatePickerDialog_shipDate());
         etRepairedDate.setOnClickListener(V -> showDatePickerDialog_repairDate());
 
     }
 
+    public void addButton(View view) {
+
+        String component = etComponent.getText().toString();
+        float price = Float.parseFloat(etPrice.getText().toString());
+        String shipmentAddress = etShipmentAddress.getText().toString();
+        String shipmentDate = etShipmentDate.getText().toString();
+        String repairedDate = etRepairedDate.getText().toString();
+
+        if (component.isEmpty() || price == 0.0 || shipmentAddress.isEmpty()) {
+            Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
+            return;
+        }
+        LocalDate shipDate = shipmentDate.isEmpty()
+                ? LocalDate.of(0000, 01, 01) : LocalDate.parse(shipmentDate, formatter);
+        LocalDate repairDate = repairedDate.isEmpty()
+                ? LocalDate.of(0000, 01, 01) : LocalDate.parse(repairedDate, formatter);
+
+        repair = new Repair(component, price, shipmentAddress,
+                shipDate, repairDate);
+        presenter.registerRepair(repair);
+        onBackPressed();
+    }
+
+    @Override
+    public void resetForm() {
+        etComponent.setText("");
+        etPrice.setText("");
+        etShipmentAddress.setText("");
+        etShipmentDate.setText("");
+        etRepairedDate.setText("");
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(this, R.string.repair_registered, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showError(String errorMessage) {
+        Snackbar.make(etComponent, R.string.error_registering, BaseTransientBottomBar.LENGTH_LONG).show();
+    }
+
+    public void cancelButton(View view) {
+        onBackPressed();
+    }
+
+    //DATE PICKER para la fecha de envio y reparacion
     private void showDatePickerDialog_shipDate() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -95,52 +142,7 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
         datePickerDialog.show();
     }
 
-
-
-    public void addButton(View view) {
-
-        String component = etComponent.getText().toString();
-        String price = etPrice.getText().toString();
-        String shipmentAddress = etShipmentAddress.getText().toString();
-        String shipmentDate = etShipmentDate.getText().toString();
-        String repairedDate = etRepairedDate.getText().toString();
-
-        if (component.isEmpty() || price.isEmpty() || shipmentAddress.isEmpty()) {
-            Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
-            return;
-        }
-        LocalDate shipDate = shipmentDate.isEmpty() ? LocalDate.of(0000, 01, 01) : LocalDate.parse(shipmentDate, formatter);
-        LocalDate repairDate = repairedDate.isEmpty() ? LocalDate.of(0000, 01, 01) : LocalDate.parse(repairedDate, formatter);
-
-
-        repair = new Repair(component, price, shipmentAddress,
-                shipDate, repairDate);
-        presenter.registerRepair(repair);
-        onBackPressed();
-    }
-
-    public void cancelButton(View view) {
-        onBackPressed();
-    }
-    @Override
-    public void showMessage(String message) {
-        Toast.makeText(this, R.string.repair_registered, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void resetForm() {
-        etComponent.setText("");
-        etPrice.setText("");
-        etShipmentAddress.setText("");
-        etShipmentDate.setText("");
-        etRepairedDate.setText("");
-    }
-    @Override
-    public void showError(String errorMessage) {
-        Snackbar.make(etComponent, R.string.error_registering, BaseTransientBottomBar.LENGTH_LONG).show();
-    }
-
-
+//ACTION BAR
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.actonbar_preferencesmenu, menu);
@@ -159,12 +161,14 @@ public class RepairRegisterView extends AppCompatActivity implements RepairRegis
         return super.onOptionsItemSelected(item);
     }
 
+    //IDIOMAS
+
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
-        builder.setItems(languages, (dialog, which) -> {
-            switch (which) {
+        builder.setTitle(R.string.selectLanguage);
+        builder.setItems(languages, (dialog, which) ->{
+            switch (which){
                 case 0:
                     setLocale("es");
                     break;

@@ -40,7 +40,7 @@ public class ClientMapView extends AppCompatActivity implements ClientListContra
         clientListPresenter.loadAllClients();
     }
 
-
+    //MAP
 
     private void initializePointManager() {
         AnnotationPlugin annotationPlugin = AnnotationPluginImplKt.getAnnotations(mapView);
@@ -85,8 +85,7 @@ public class ClientMapView extends AppCompatActivity implements ClientListContra
     }
 
     @Override
-    public void showMessage(String message) {
+    public void showErrorMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-
     }
 }

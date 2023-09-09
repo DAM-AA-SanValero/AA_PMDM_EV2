@@ -31,6 +31,6 @@ public class ClientListPresenter implements ClientListContract.Presenter
 
     @Override
     public void onLoadClientsError(String message) {
-        view.showMessage(message);
+        view.showErrorMessage(message);
     }
 }

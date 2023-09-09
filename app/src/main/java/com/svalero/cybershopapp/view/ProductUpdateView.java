@@ -32,10 +32,12 @@ public class ProductUpdateView extends AppCompatActivity implements ProductUpdat
     private static final int SELECT_PICTURE = 100;
     private ProductDetailsPresenter presenterDetails;
     private ProductUpdatePresenter presenter;
+
     private String image;
     private ImageView imageView;
     private EditText etName, etType, etPrice, etOrigin;
     private CheckBox cbStock;
+
     long productId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +45,14 @@ public class ProductUpdateView extends AppCompatActivity implements ProductUpdat
         setContentView(R.layout.product_update_view);
 
         initializeViews();
+
+        imageView.setOnClickListener(v -> openGallery());
         presenter = new ProductUpdatePresenter(this);
         presenterDetails = new ProductDetailsPresenter(this);
 
         productId = getIntent().getLongExtra("product_id", -1);
         if (productId == -1) return;
         presenterDetails.getProductDetails(productId);
-
-
     }
 
     private void initializeViews() {
@@ -76,8 +78,6 @@ public class ProductUpdateView extends AppCompatActivity implements ProductUpdat
                     .load(image)
                     .into(imageView);
         }
-        imageView.setOnClickListener(v -> openGallery());
-
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ProductUpdateView extends AppCompatActivity implements ProductUpdat
 
         String newName = etName.getText().toString();
         String newType = etType.getText().toString();
-        String newPrice = etPrice.getText().toString();
+        float newPrice = Float.parseFloat(etPrice.getText().toString());
         String newOrigin = etOrigin.getText().toString();
         boolean isInStock = cbStock.isChecked();
 
@@ -103,7 +103,7 @@ public class ProductUpdateView extends AppCompatActivity implements ProductUpdat
     @Override
     public void showProductUpdatedMessage(Product product) {
         showProductDetails(product);
-        showSuccessMessage("Producto actualizado correctamente.");
+        showSuccessMessage(getString(R.string.productUpdated));
     }
 
     @Override
@@ -153,9 +153,9 @@ public class ProductUpdateView extends AppCompatActivity implements ProductUpdat
     }
 
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:

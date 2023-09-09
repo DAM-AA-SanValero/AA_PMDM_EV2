@@ -16,7 +16,7 @@ public interface ClientListContract {
 
     interface View {
         void showClients(List<Client> clients);
-        void showMessage(String message);
+        void showErrorMessage(String message);
     }
 
     interface Presenter {
