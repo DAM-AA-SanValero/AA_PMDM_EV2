@@ -1,7 +1,9 @@
 package com.svalero.cybershopapp.model;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
 
+import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.api.CybershopApi;
 import com.svalero.cybershopapp.api.CybershopApiInterface;
 import com.svalero.cybershopapp.contract.ClientUpdateContract;
@@ -12,6 +14,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ClientUpdateModel implements ClientUpdateContract.Model {
+
+
     @Override
     public void updateClient(long id, Client client, OnUpdateClientListener listener) {
 

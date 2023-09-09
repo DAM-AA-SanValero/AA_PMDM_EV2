@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -84,7 +85,7 @@ public class RepairAdapter extends RecyclerView.Adapter<RepairAdapter.RepairHold
 
     @Override
     public void showMessage(String message) {
-        Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.repair_deleted, Toast.LENGTH_LONG).show();
     }
 
     public class RepairHolder extends RecyclerView.ViewHolder{

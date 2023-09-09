@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
@@ -54,9 +56,10 @@ import java.util.Locale;
 public class ClientUpdateView extends AppCompatActivity implements ClientUpdateContract.View,
         ClientDetailsContract.View {
 
-    private static final int SELECT_PICTURE = 100;
     private ClientDetailsPresenter presenterDetails;
     private ClientUpdatePresenter presenter;
+
+    private static final int SELECT_PICTURE = 100;
     private EditText etName, etSurname, etNumber, etDate;
     private MapView clientMap;
     private ScrollView scrollView;
@@ -68,8 +71,8 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
     private Boolean favouriteValue = null;
     private double currentLatitude;
     private double currentLongitude;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     long clientId;
 
     @Override
@@ -79,6 +82,7 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
 
         initializeViews();
 
+        imageView.setOnClickListener(v -> openGallery());
         etDate.setOnClickListener(v -> showDatePickerDialog(etDate));
 
         presenter = new ClientUpdatePresenter(this);
@@ -92,20 +96,6 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         findViewById(R.id.cancelBtn).setOnClickListener(this::cancelButton);
     }
 
-    private void showDatePickerDialog(EditText targetEditText) {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                ClientUpdateView.this,
-                (view, year1, month1, dayOfMonth) -> {
-            LocalDate selectedDate = LocalDate.of(year1, month1 + 1, dayOfMonth);
-            targetEditText.setText(selectedDate.toString());
-        }, year, month, day);
-        datePickerDialog.show();
-    }
     private void initializeViews() {
         scrollView = findViewById(R.id.scrollView);
         imageView = findViewById(R.id.clientPhoto);
@@ -122,7 +112,7 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
             removeAllMarkers();
             this.point = point;
             addMarker(point);
-            return true ;
+            return true;
         });
 
         gesturesPlugin.setPinchToZoomEnabled(true);
@@ -131,10 +121,12 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
             public void onMoveBegin(MoveGestureDetector detector) {
                 scrollView.requestDisallowInterceptTouchEvent(true);
             }
+
             @Override
             public boolean onMove(@NonNull MoveGestureDetector detector) {
                 return false;
             }
+
             @Override
             public void onMoveEnd(MoveGestureDetector detector) {
                 scrollView.requestDisallowInterceptTouchEvent(false);
@@ -152,7 +144,7 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         if (client.getRegisterDate() != null) {
             etDate.setText(client.getRegisterDate().format(formatter));
         } else {
-            etDate.setText("Fecha nula");
+            etDate.setText(R.string.dateNotRegistered);
         }
         cbVip.setChecked(client.isVip());
         currentLatitude = client.getLatitude();
@@ -161,12 +153,11 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
 
         image = client.getImage();
 
-        if(image != null && !image.isEmpty()) {
+        if (image != null && !image.isEmpty()) {
             Glide.with(this)
                     .load(image)
                     .into(imageView);
         }
-        imageView.setOnClickListener(v -> openGallery());
 
         initializePointManager();
         addClientToMap(client);
@@ -175,33 +166,59 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
     }
 
     @Override
-    public void showMessage(String message) {
-
+    public void showErrorMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    public void updateButton(View view){
+    public void updateButton(View view) {
 
-        String image = null;
         String newName = etName.getText().toString();
         String newSurname = etSurname.getText().toString();
-        String newNumber = etNumber.getText().toString();
+        String numberString = etNumber.getText().toString();
         boolean status = cbVip.isChecked();
         double latitude = (this.point != null) ? this.point.latitude() : currentLatitude;
         double longitude = (this.point != null) ? this.point.longitude() : currentLongitude;
         LocalDate newDate = LocalDate.parse(etDate.getText().toString(), formatter);
 
-        if (!newName.isEmpty() && !newSurname.isEmpty() && !newNumber.isEmpty()) {
+        if (numberString.length() > 9) {
+            Snackbar.make(this.getCurrentFocus(), R.string.phoneNumberDigits, BaseTransientBottomBar.LENGTH_LONG).show();
+            return;
+        }
 
+        int newNumber = Integer.parseInt(numberString);
+
+
+        if (!newName.isEmpty() && !newSurname.isEmpty() && newNumber != 0) {
             presenter.updateClient(clientId, new Client(newName, newSurname, newNumber,
-                    newDate, status, latitude, longitude, image, favouriteValue ));
+                    newDate, status, latitude, longitude, image, favouriteValue));
             onBackPressed();
         } else {
-            showError("Completa todos los campos");
+            showError(getString(R.string.required_fields));
         }
     }
 
-    public void cancelButton(View view){onBackPressed();}
+    @Override
+    public void showClientUpdatedMessage(Client client) {
+        showClientDetails(client);
+        showSuccessMessage(getString(R.string.client_updated));
+    }
 
+    @Override
+    public void showSuccessMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+
+    public void cancelButton(View view) {
+        onBackPressed();
+    }
+
+    //IMAGEN
 
     private void openGallery() {
         Intent intent = new Intent();
@@ -209,6 +226,7 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_profile_image)), SELECT_PICTURE);
     }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -219,51 +237,8 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
             image = filePath.toString();
         }
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.actonbar_preferencesmenu, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        int id = item.getItemId();
-
-        if (id == R.id.getPreferences){
-            showLanguageSelectionDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
-        builder.setItems(languages, (dialog, which) ->{
-            switch (which){
-                case 0:
-                    setLocale("es");
-                    break;
-                case 1:
-                    setLocale("en");
-                    break;
-            }
-        });
-        builder.create().show();
-    }
-
-    private void setLocale(String lang) {
-        Locale locale = new Locale(lang);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources()
-                .getDisplayMetrics());
-        recreate();
-    }
-
-
+    //MAPA
     private void addClientToMap(Client client) {
         Point clientPoint = Point.fromLngLat(client.getLongitude(), client.getLatitude());
         addMarker(clientPoint);
@@ -298,25 +273,73 @@ public class ClientUpdateView extends AppCompatActivity implements ClientUpdateC
         clientMap.getMapboxMap().setCamera(cameraPosition);
     }
 
-    private void removeAllMarkers(){
+    private void removeAllMarkers() {
         pointAnnotationManager.deleteAll();
     }
+
+    //DATE PICKER para seleccionar fecha
+    private void showDatePickerDialog(EditText targetEditText) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                ClientUpdateView.this,
+                (view, year1, month1, dayOfMonth) -> {
+                    LocalDate selectedDate = LocalDate.of(year1, month1 + 1, dayOfMonth);
+                    targetEditText.setText(selectedDate.toString());
+                }, year, month, day);
+        datePickerDialog.show();
+    }
+
+    //ACTION BAR
+
     @Override
-    public void showError(String errorMessage) {
-        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.actonbar_preferencesmenu, menu);
+        return true;
     }
 
     @Override
-    public void showSuccessMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.getPreferences) {
+            showLanguageSelectionDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void showClientUpdatedMessage(Client client) {
-        showClientDetails(client);
-        showSuccessMessage("Cliente actualizado correctamente.");
+    //IDIOMA
+
+    private void showLanguageSelectionDialog() {
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.selectLanguage);
+        builder.setItems(languages, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    setLocale("es");
+                    break;
+                case 1:
+                    setLocale("en");
+                    break;
+            }
+        });
+        builder.create().show();
     }
 
-
+    private void setLocale(String lang) {
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.setLocale(locale);
+        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources()
+                .getDisplayMetrics());
+        recreate();
+    }
 }
 

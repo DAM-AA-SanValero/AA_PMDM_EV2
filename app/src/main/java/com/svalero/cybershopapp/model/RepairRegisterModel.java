@@ -32,7 +32,7 @@ public class RepairRegisterModel implements RepairRegisterContract.Model {
                 @Override
                 public void onFailure(Call<Repair> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API error";
                     listener.onRegisterRepairError(message);
                 }
             });

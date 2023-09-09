@@ -26,7 +26,7 @@ public class ProductDeleteModel implements ProductDeleteContract.Model {
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API Error";
                     listener.onDeleteProductError(message);
                 }
             });

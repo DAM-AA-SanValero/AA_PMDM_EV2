@@ -1,7 +1,6 @@
 package com.svalero.cybershopapp.model;
 
 import android.database.sqlite.SQLiteConstraintException;
-
 import com.svalero.cybershopapp.api.CybershopApi;
 import com.svalero.cybershopapp.api.CybershopApiInterface;
 import com.svalero.cybershopapp.contract.ClientDetailsContract;
@@ -25,7 +24,7 @@ public class ClientDetailsModel implements ClientDetailsContract.Model {
                         Client client = response.body();
                         listener.onLoadClientSuccess(client);
                     } else {
-                        String message = "Error en la operación: Respuesta inválida de la API";
+                        String message = "API error response";
                         listener.onLoadClientError(message);
                     }
                 }
@@ -33,14 +32,14 @@ public class ClientDetailsModel implements ClientDetailsContract.Model {
                 @Override
                 public void onFailure(Call<Client> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API error";
                     listener.onLoadClientError(message);
                 }
             });
 
         } catch (SQLiteConstraintException sce) {
             sce.printStackTrace();
-            String message = "Error en la operación: " + sce.getMessage();
+            String message = "SQL Error: " + sce.getMessage();
             listener.onLoadClientError(message);
         }
     }

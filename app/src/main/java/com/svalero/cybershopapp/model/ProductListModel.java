@@ -27,7 +27,7 @@ public class ProductListModel implements ProductListContract.Model {
             @Override
             public void onFailure(Call<List<Product>> call, Throwable t) {
                 t.printStackTrace();
-                String message = "Error en la operación";
+                String message = "API error";
                 listener.onLoadProductsError(message);
             }
         });

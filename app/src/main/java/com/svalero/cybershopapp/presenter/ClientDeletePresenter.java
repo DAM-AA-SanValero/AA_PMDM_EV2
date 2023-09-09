@@ -1,5 +1,7 @@
 package com.svalero.cybershopapp.presenter;
 
+import android.content.Context;
+
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.adapters.ClientAdapter;
 import com.svalero.cybershopapp.contract.ClientDeleteContract;
@@ -12,12 +14,14 @@ import com.svalero.cybershopapp.view.ClientRegisterView;
 public class ClientDeletePresenter implements ClientDeleteContract.Presenter,
     ClientDeleteContract.Model.OnDeleteClientListener{
 
+    Context context;
     private ClientDeleteModel model;
     private ClientAdapter view;
 
     public ClientDeletePresenter(ClientAdapter view) {
         model = new ClientDeleteModel();
         this.view = view;
+        this.context = view.context;
     }
 
     @Override
@@ -27,11 +31,11 @@ public class ClientDeletePresenter implements ClientDeleteContract.Presenter,
 
     @Override
     public void onDeleteClientSuccess() {
-        view.showMessage("El cliente se ha eliminado correctamente");
+        view.showMessage(context.getString(R.string.clientDeleted));
     }
 
     @Override
     public void onDeleteClientError(String message) {
-        view.showError("Error al eliminar el cliente");
+        view.showError(context.getString(R.string.client_not_deleted));
     }
 }

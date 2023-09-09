@@ -23,19 +23,24 @@ public class ProductRegisterModel implements ProductRegisterContract.Model {
             callProducts.enqueue(new Callback<Product>() {
                 @Override
                 public void onResponse(Call<Product> call, Response<Product> response) {
-                    Product product = response.body();
-                    listener.onRegisterProductSuccess(product);
+                    if (response.isSuccessful()) {
+                        Product product = response.body();
+                        listener.onRegisterProductSuccess(product);
+                    } else {
+                        String errorMessage = "Error registering product";
+                        listener.onRegisterProductError(errorMessage);
+                    }
                 }
 
                 @Override
                 public void onFailure(Call<Product> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API error";
                     listener.onRegisterProductError(message);
                 }
             });
 
-        } catch (SQLiteConstraintException sce){
+        } catch (SQLiteConstraintException sce) {
             sce.printStackTrace();
         }
 

@@ -3,18 +3,17 @@ package com.svalero.cybershopapp.view;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
-import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.mapbox.geojson.Point;
@@ -38,10 +37,9 @@ import java.util.Locale;
 public class ClientDetailsView extends AppCompatActivity implements ClientDetailsContract.View {
 
     private ClientDetailsPresenter presenter;
+
     private MapView mapView;
     private PointAnnotationManager pointAnnotationManager;
-    private ImageView imageView;
-    private String image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +56,7 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
     }
     @Override
     public void showClientDetails(Client client) {
-        imageView = findViewById(R.id.clientPhoto);
+        ImageView imageView = findViewById(R.id.clientPhoto);
         TextView tvName = findViewById(R.id.clientName);
         TextView tvSurname = findViewById(R.id.clientSurname);
         TextView tvNumber = findViewById(R.id.clientNumber);
@@ -82,7 +80,7 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         boolean isVip = client.isVip();
         tvStatus.setText(isVip ? getString(R.string.isVIP) : getString(R.string.isNotVip));
 
-        image = client.getImage();
+        String image = client.getImage();
 
         if(image != null && !image.isEmpty()) {
             Glide.with(this)
@@ -94,61 +92,14 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
 
         initializePointManager();
         addClientToMap(client);
-
-
-
     }
-
-
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.actonbar_mainmenu, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();
-
-        if (item.getItemId() == R.id.getMap) {
-            Intent intent = new Intent(this, ClientMapView.class);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.getPreferences){
-            showLanguageSelectionDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public void showErrorMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
-        builder.setItems(languages, (dialog, which) ->{
-            switch (which){
-                case 0:
-                    setLocale("es");
-                    break;
-                case 1:
-                    setLocale("en");
-                    break;
-            }
-        });
-        builder.create().show();
-    }
-
-    private void setLocale(String lang) {
-        Locale locale = new Locale(lang);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources()
-                .getDisplayMetrics());
-        recreate();
-    }
-
+    //MAPA
     private void addClientToMap(Client client) {
         Point clientPoint = Point.fromLngLat(client.getLongitude(), client.getLatitude());
         addMarker(clientPoint, client.getName());
@@ -184,9 +135,52 @@ public class ClientDetailsView extends AppCompatActivity implements ClientDetail
         mapView.getMapboxMap().setCamera(cameraPosition);
     }
 
-
+//ACTION BAR
     @Override
-    public void showMessage(String message) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.actonbar_mainmenu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
+        int id = item.getItemId();
+
+        if (item.getItemId() == R.id.getMap) {
+            Intent intent = new Intent(this, ClientMapView.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.getPreferences){
+            showLanguageSelectionDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showLanguageSelectionDialog() {
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.selectLanguage);
+        builder.setItems(languages, (dialog, which) ->{
+            switch (which){
+                case 0:
+                    setLocale("es");
+                    break;
+                case 1:
+                    setLocale("en");
+                    break;
+            }
+        });
+        builder.create().show();
+    }
+
+    private void setLocale(String lang) {
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.setLocale(locale);
+        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources()
+                .getDisplayMetrics());
+        recreate();
     }
 }

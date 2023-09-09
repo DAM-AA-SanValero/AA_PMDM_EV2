@@ -27,7 +27,7 @@ public class ClientListModel implements ClientListContract.Model {
             @Override
             public void onFailure(Call<List<Client>> call, Throwable t) {
                 t.printStackTrace();
-                String message = "Error en la operación";
+                String message = "API reading error";
                 listener.onLoadClientsError(message);
             }
         });

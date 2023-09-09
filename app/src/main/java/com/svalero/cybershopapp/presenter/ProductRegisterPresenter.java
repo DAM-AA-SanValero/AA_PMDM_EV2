@@ -24,7 +24,7 @@ public class ProductRegisterPresenter implements ProductRegisterContract.Present
 
     @Override
     public void onRegisterProductSuccess(Product product) {
-        view.showMessage(product.getId() + "se ha registrado correctamente");
+        view.showMessage(product.getId() + "registered");
         view.resetForm();
     }
 

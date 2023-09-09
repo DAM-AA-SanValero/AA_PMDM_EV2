@@ -1,5 +1,7 @@
 package com.svalero.cybershopapp.presenter;
 
+import android.content.Context;
+
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ClientRegisterContract;
 import com.svalero.cybershopapp.contract.ClientUpdateContract;
@@ -14,6 +16,7 @@ public class ClientUpdatePresenter implements ClientUpdateContract.Presenter,
 
     private ClientUpdateModel model;
     private ClientUpdateContract.View view;
+    Context context;
 
     public ClientUpdatePresenter(ClientUpdateContract.View view) {
         model = new ClientUpdateModel();

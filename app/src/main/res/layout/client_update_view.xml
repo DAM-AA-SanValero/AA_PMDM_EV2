@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:background="#FFFFFF"
                     android:focusable="false"
-                    android:hint="Date"
+                    android:hint="@string/date"
                     android:onClick="showDatePickerDialog" />
             </com.google.android.material.textfield.TextInputLayout>
 

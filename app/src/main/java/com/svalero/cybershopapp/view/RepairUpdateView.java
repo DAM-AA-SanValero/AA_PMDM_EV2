@@ -34,10 +34,13 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
 
     private RepairUpdatePresenter presenter;
     private RepairDetailsPresenter presenterDetails;
+
     private TextView tvComponent, tvPrice, tvShipmentAddress, tvShipmentDate, tvRepairedDate;
     private EditText etComponent, etPrice, etShipmentAddress, etShipmentDate, etRepairedDate;
-    long repairId;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    long repairId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,75 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
         if (repairId == -1) return;
         presenterDetails.getRepairDetails(repairId);
     }
+    private void initializeViews() {
+        tvComponent = findViewById(R.id.etComponent);
+        tvPrice = findViewById(R.id.etPrice);
+        tvShipmentAddress = findViewById(R.id.etAddress);
+        tvShipmentDate = findViewById(R.id.etShipDate);
+        tvRepairedDate = findViewById(R.id.etRepairDate);
+
+        etComponent = findViewById(R.id.etComponent);
+        etPrice = findViewById(R.id.etPrice);
+        etShipmentAddress = findViewById(R.id.etAddress);
+        etShipmentDate = findViewById(R.id.etShipDate);
+        etRepairedDate = findViewById(R.id.etRepairDate);
+
+    }
+    public void showRepairDetails(Repair repair) {
+        repairId = repair.getId();
+        tvComponent.setText(repair.getComponent());
+        tvPrice.setText(String.valueOf(repair.getPrice()));
+        tvShipmentAddress.setText(repair.getShippingAddress());
+
+        if (repair.getShipmentDate() != null) {
+            tvShipmentDate.setText(repair.getShipmentDate().format(formatter));
+        } else {
+            tvShipmentDate.setText("Not shipped");
+        }
+
+        if (repair.getRepairedDate() != null) {
+            tvRepairedDate.setText(repair.getRepairedDate().format(formatter));
+        } else {
+            tvRepairedDate.setText("Not repaired");
+        }
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+
+
+    public void updateButton(View view){
+        String newComponent = etComponent.getText().toString();
+        float newPrice = Float.parseFloat(etPrice.getText().toString());
+        String newShipAddress = etShipmentAddress.getText().toString();
+        LocalDate newShipDate = LocalDate.parse(etShipmentDate.getText().toString(), formatter);
+        LocalDate newRepairedDate = LocalDate.parse(etRepairedDate.getText().toString(), formatter);
+
+
+        presenter.updateRepair(repairId, new Repair(newComponent, newPrice, newShipAddress,
+                newShipDate, newRepairedDate));
+
+        onBackPressed();
+    }
+
+    @Override
+    public void showRepairUpdatedMessage(Repair repair) {
+        showRepairDetails(repair);
+        showSuccessMessage(getString(R.string.repair_updated));
+    }
+    @Override
+    public void showSuccessMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+    public void cancelButton(View view){onBackPressed();}
 
     private void showDatePickerDialog(EditText targetEditText) {
         Calendar calendar = Calendar.getInstance();
@@ -74,48 +146,6 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
         );
         datePickerDialog.show();
     }
-    private void initializeViews() {
-        tvComponent = findViewById(R.id.etComponent);
-        tvPrice = findViewById(R.id.etPrice);
-        tvShipmentAddress = findViewById(R.id.etAddress);
-        tvShipmentDate = findViewById(R.id.etShipDate);
-        tvRepairedDate = findViewById(R.id.etRepairDate);
-
-        etComponent = findViewById(R.id.etComponent);
-        etPrice = findViewById(R.id.etPrice);
-        etShipmentAddress = findViewById(R.id.etAddress);
-        etShipmentDate = findViewById(R.id.etShipDate);
-        etRepairedDate = findViewById(R.id.etRepairDate);
-
-    }
-    public void showRepairDetails(Repair repair) {
-        repairId = repair.getId();
-        tvComponent.setText(repair.getComponent());
-        tvPrice.setText(repair.getPrice());
-        tvShipmentAddress.setText(repair.getShippingAddress());
-        tvShipmentDate.setText(repair.getShipmentDate().format(formatter));
-        tvRepairedDate.setText(repair.getRepairedDate().format(formatter));
-    }
-
-    @Override
-    public void showMessage(String message) {
-
-    }
-
-    public void updateButton(View view){
-        String newComponent = etComponent.getText().toString();
-        String newPrice = etPrice.getText().toString();
-        String newShipAddress = etShipmentAddress.getText().toString();
-        LocalDate newShipDate = LocalDate.parse(etShipmentDate.getText().toString(), formatter);
-        LocalDate newRepairedDate = LocalDate.parse(etRepairedDate.getText().toString(), formatter);
-
-
-        presenter.updateRepair(repairId, new Repair(newComponent, newPrice, newShipAddress,
-                newShipDate, newRepairedDate));
-
-        onBackPressed();
-    }
-    public void cancelButton(View view){onBackPressed();}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,9 +165,9 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
     }
 
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:
@@ -159,22 +189,6 @@ public class RepairUpdateView extends AppCompatActivity implements RepairUpdateC
         getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources()
                 .getDisplayMetrics());
         recreate();
-    }
-
-    @Override
-    public void showError(String errorMessage) {
-        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSuccessMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showRepairUpdatedMessage(Repair repair) {
-        showRepairDetails(repair);
-        showSuccessMessage("Reparación actualizada correctamente");
     }
 }
 

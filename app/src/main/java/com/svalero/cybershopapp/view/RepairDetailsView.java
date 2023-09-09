@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -46,7 +47,7 @@ public class RepairDetailsView extends AppCompatActivity implements RepairDetail
         TextView tvRepairedDate = findViewById(R.id.etRepairDate);
 
         tvComponent.setText(repair.getComponent());
-        tvPrice.setText(repair.getPrice());
+        tvPrice.setText(String.valueOf(repair.getPrice()));
         tvShipmentAddress.setText(repair.getShippingAddress());
         LocalDate shipmentDate = repair.getShipmentDate();
         LocalDate repairedDate = repair.getRepairedDate();
@@ -78,7 +79,7 @@ public class RepairDetailsView extends AppCompatActivity implements RepairDetail
 
     @Override
     public void showMessage(String message) {
-
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -98,9 +99,9 @@ public class RepairDetailsView extends AppCompatActivity implements RepairDetail
     }
 
     private void showLanguageSelectionDialog() {
-        String[] languages = {"Español", "English"};
+        String[] languages = {getString(R.string.Spanish), getString(R.string.English)};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select language");
+        builder.setTitle(R.string.selectLanguage);
         builder.setItems(languages, (dialog, which) ->{
             switch (which){
                 case 0:

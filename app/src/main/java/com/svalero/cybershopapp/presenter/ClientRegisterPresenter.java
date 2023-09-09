@@ -1,5 +1,7 @@
 package com.svalero.cybershopapp.presenter;
 
+import android.content.Context;
+
 import com.svalero.cybershopapp.R;
 import com.svalero.cybershopapp.contract.ClientRegisterContract;
 import com.svalero.cybershopapp.domain.Client;
@@ -24,7 +26,7 @@ public class ClientRegisterPresenter implements ClientRegisterContract.Presenter
 
     @Override
     public void onRegisterClientSuccess(Client client) {
-        view.showMessage(client.getId() + "se ha registrado correctamente");
+        view.showMessage(client.getId() + "Registered");
         view.resetForm();
     }
 

@@ -17,7 +17,7 @@ public interface ClientDetailsContract {
 
     interface View {
         void showClientDetails(Client client);
-        void showMessage(String message);
+        void showErrorMessage(String message);
 
     }
 

@@ -48,7 +48,7 @@
                 android:layout_marginBottom="10dp"
                 android:ems="10"
                 android:hint="@string/price_required"
-                android:inputType="text"
+                android:inputType="numberDecimal"
                 android:minHeight="48dp" />
 
             <EditText

@@ -15,7 +15,7 @@ public class Client {
     private long id;
     private String name;
     private String surname;
-    private String number;
+    private int number;
     private LocalDate registerDate;
     private boolean vip;
     private double latitude;
@@ -23,7 +23,7 @@ public class Client {
     private String image;
     private Boolean favourite;
 
-    public Client(String name, String surname, String number, LocalDate registerDate,
+    public Client(String name, String surname, int number, LocalDate registerDate,
                   boolean vip, double latitude, double longitude, String image, Boolean isFavourite) {
         this.name = name;
         this.surname = surname;
@@ -60,11 +60,11 @@ public class Client {
         this.surname = surname;
     }
 
-    public String getNumber() {
+    public int getNumber() {
         return number;
     }
 
-    public void setNumber(String number) {
+    public void setNumber(int number) {
         this.number = number;
     }
 

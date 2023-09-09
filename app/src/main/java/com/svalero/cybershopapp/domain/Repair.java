@@ -14,28 +14,17 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class Repair {
 
-    @PrimaryKey(autoGenerate = true)
     private long id;
-
-    @ColumnInfo
     private String component;
-
-    @ColumnInfo
-    private String price;
-
-    @ColumnInfo
+    private float price;
     private String shippingAddress;
-
-    @ColumnInfo
     private LocalDate shipmentDate;
-
-    @ColumnInfo
     private LocalDate repairedDate;
 
-    public Repair(String component, String price, String shippingAddress, LocalDate shipmentDate, LocalDate repairedDate) {
+    public Repair(String component, float price, String shippingAddress,
+                  LocalDate shipmentDate, LocalDate repairedDate) {
         this.component = component;
         this.price = price;
         this.shippingAddress = shippingAddress;
@@ -59,11 +48,11 @@ public class Repair {
         this.component = component;
     }
 
-    public String getPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 

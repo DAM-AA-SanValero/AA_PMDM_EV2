@@ -27,7 +27,7 @@ public class RepairListModel implements RepairListContract.Model {
             @Override
             public void onFailure(Call<List<Repair>> call, Throwable t) {
                 t.printStackTrace();
-                String message = "Error en la operación";
+                String message = "API error";
                 listener.onLoadRepairsError(message);
             }
         });

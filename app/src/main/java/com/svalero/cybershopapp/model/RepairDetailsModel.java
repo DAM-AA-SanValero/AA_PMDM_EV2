@@ -26,7 +26,7 @@ public class RepairDetailsModel implements RepairDetailsContract.Model {
                         Repair repair = response.body();
                         listener.onLoadRepairSuccess(repair);
                     } else {
-                        String message = "Error en la operación: Respuesta inválida de la API";
+                        String message = "API error response";
                         listener.onLoadRepairError(message);
                     }
                 }
@@ -34,7 +34,7 @@ public class RepairDetailsModel implements RepairDetailsContract.Model {
                 @Override
                 public void onFailure(Call<Repair> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API error";
                     listener.onLoadRepairError(message);
                 }
             });

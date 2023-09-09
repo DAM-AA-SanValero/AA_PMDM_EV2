@@ -25,7 +25,7 @@ public class ProductDetailsModel implements ProductDetailsContract.Model {
                         Product product = response.body();
                         listener.onLoadProductSuccess(product);
                     } else {
-                        String message = "Error en la operación: Respuesta inválida de la API";
+                        String message = "API error response";
                         listener.onLoadProductError(message);
                     }
                 }
@@ -33,14 +33,14 @@ public class ProductDetailsModel implements ProductDetailsContract.Model {
                 @Override
                 public void onFailure(Call<Product> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API error";
                     listener.onLoadProductError(message);
                 }
             });
 
         } catch (SQLiteConstraintException sce) {
             sce.printStackTrace();
-            String message = "Error en la operación: " + sce.getMessage();
+            String message = "API error: " + sce.getMessage();
             listener.onLoadProductError(message);
         }
     }

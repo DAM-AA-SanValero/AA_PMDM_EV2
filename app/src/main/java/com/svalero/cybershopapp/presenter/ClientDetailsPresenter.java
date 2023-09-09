@@ -34,6 +34,6 @@ public class ClientDetailsPresenter implements ClientDetailsContract.Presenter,
 
     @Override
     public void onLoadClientError(String message) {
-        view.showMessage(message);
+        view.showErrorMessage(message);
     }
 }

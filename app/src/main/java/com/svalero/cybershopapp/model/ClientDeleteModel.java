@@ -29,7 +29,7 @@ public class ClientDeleteModel implements ClientDeleteContract.Model {
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
                     t.printStackTrace();
-                    String message = "Error en la operación";
+                    String message = "API error";
                     listener.onDeleteClientError(message);
                 }
             });

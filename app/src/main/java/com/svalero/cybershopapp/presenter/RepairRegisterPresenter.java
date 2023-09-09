@@ -24,7 +24,7 @@ public class RepairRegisterPresenter implements RepairRegisterContract.Presenter
 
     @Override
     public void onRegisterRepairSuccess(Repair repair) {
-        view.showMessage(repair.getId() + "se ha registrado correctamente");
+        view.showMessage(repair.getId() + "registered");
         view.resetForm();
     }
 
