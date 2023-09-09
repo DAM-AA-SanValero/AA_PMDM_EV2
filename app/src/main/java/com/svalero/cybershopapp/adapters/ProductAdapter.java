@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -70,7 +71,7 @@ implements ProductDeleteContract.View {
 
     @Override
     public void showMessage(String message) {
-        Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.product_deleted, Toast.LENGTH_LONG).show();
     }
 
     public class ProductHolder extends RecyclerView.ViewHolder{

@@ -79,7 +79,8 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientHold
     }
     @Override
     public void showMessage(String message) {
-        Snackbar.make(snackBarView, message, BaseTransientBottomBar.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.clientDeleted, Toast.LENGTH_LONG).show();
+
     }
 
     public class ClientHolder extends RecyclerView.ViewHolder{

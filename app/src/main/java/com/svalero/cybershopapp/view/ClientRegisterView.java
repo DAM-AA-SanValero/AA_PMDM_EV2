@@ -133,12 +133,13 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
 
         String name = etName.getText().toString();
         String surname = etSurname.getText().toString();
-        int number = Integer.parseInt(etNumber.getText().toString());
+        String numberString = etNumber.getText().toString();
+        int number = 0;
         String dateString = etDate.getText().toString();
         boolean vip = cbVIP.isChecked();
         boolean favourite = false;
 
-        if (name.isEmpty() || surname.isEmpty() || number == 0 || dateString.isEmpty()){
+        if (name.isEmpty() || surname.isEmpty() || numberString.isEmpty() || dateString.isEmpty()){
             Snackbar.make(this.getCurrentFocus(), required_data, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
@@ -147,6 +148,14 @@ public class ClientRegisterView extends AppCompatActivity implements ClientRegis
             Snackbar.make(this.getCurrentFocus(), R.string.select_the_correct_location, BaseTransientBottomBar.LENGTH_LONG).show();
             return;
         }
+
+        if (numberString.length() > 9) {
+            Snackbar.make(this.getCurrentFocus(), R.string.phoneNumberDigits, BaseTransientBottomBar.LENGTH_LONG).show();
+            return;
+        }
+
+        number = Integer.parseInt(numberString);
+
 
         LocalDate date = dateString.isEmpty() ? LocalDate.of(0000, 01, 01)
                 : LocalDate.parse(dateString, formatter);

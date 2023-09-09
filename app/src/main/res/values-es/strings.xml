@@ -77,4 +77,5 @@
     <string name="error_listing_data">Error al listar la información</string>
     <string name="required_fields">Completa los campos requeridos</string>
     <string name="repair_updated">Reparación actualizada</string>
+    <string name="phoneNumberDigits">El número de teléfono debe contener solamente 9 dígitos</string>
 </resources>
